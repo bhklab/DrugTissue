@@ -6,8 +6,6 @@
   library(gplots)
   library(RColorBrewer)
   options(stringsAsFactors=FALSE)
-  library(extrafont)
-  loadfonts()
   library(xlsx)
   library(piano)
   library(survcomp)
@@ -16,8 +14,8 @@
   
   path.data=file.path("data", "analysis")
   
-  cellannotation <- read.csv(file.path("PharmacoGx-Private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#")
-  breastannotation <- read.csv(file.path("PharmacoGx-Private/inst/extdata", "brca_cell_lines_all.csv"), sep=",", comment.char="#")
+  cellannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#")
+  breastannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "brca_cell_lines_all.csv"), sep=",", comment.char="#")
   dataSets <- c(GDSC, GSK, CCLE)
   drugs <- list()
   
@@ -134,42 +132,33 @@
   save(ml, file = "./mlb.RData")
   save(mw, file = "./mwb.RData")
   
-  #ctrp goes here
+ 
   
-  for(a in 1:nrow(ctrptissuecuration))
-  {
-    if(ctrptissuecuration[a, "ctrp.tissueid"] != "")
-    {
-      ctrptissuecuration[a, "new_id"] <- ctrptissuecuration[a, "ctrp.tissueid"]
-    }
-    else
-    {
-      ctrptissuecuration[a, "new_id"] <- ctrptissuecuration[a, "unique.tissueid"]
-    }
-  }
+   #ctrp goes here
   counter <- length(dataSets) + 1
-  gseav <- data.frame(matrix(ncol = length(rownames(ctrpdrugs)), nrow = length(na.omit(unique(ctrptissuecuration$new_id)))))
-  rownames(gseav) <- na.omit(unique(ctrptissuecuration$new_id))
-  rownames(ctrpdrugs) <- ctrpdrugs$unique.drugid
-  colnames(gseav) <- rownames(ctrpdrugs)
+  gseav <- data.frame(matrix(ncol = length(rownames(CTRPv2@drug)), nrow = length(na.omit(unique(CTRPv2@cell$tissueid)))))
+  rownames(gseav) <- na.omit(unique(CTRPv2@cell$tissueid))
+  colnames(gseav) <- rownames(CTRPv2@drug)
   wt <- gseav
-  rownames(ctrpcells) <- paste(ctrpcells$unique.cellid, ctrpcells$index_ccl, sep = "_")
-  for(dr in ctrpdrugs$unique.drugid)
+  for(dr in CTRPv2@drug$drugid)
   {
     message(paste("CTRP", dr, sep = " "))
-    dataTable <- ctrpsensitivityInfo[ctrpsensitivityInfo$drugid == dr, ]
-    dataTable <- na.omit(dataTable)
-    dataTable[, "unique.tissueid"] <- ctrptissuecuration[match(dataTable$cellid, rownames(ctrptissuecuration)), "new_id"]
-    dataTable[, "auc"] <- ctrpsensitivityProfiles[rownames(dataTable), ]
+    dataTable <- CTRPv2@sensitivity$info[CTRPv2@sensitivity$info$drugid == dr, ]
+    dataTable[, "unique.tissueid"] <- CTRPv2@cell[match(dataTable$cellid, CTRPv2@cell$cellid), "tissueid"]
+    dataTable[, "auc"] <- CTRPv2@sensitivity$profiles[rownames(dataTable), "auc_published"]
     dataTable <- na.omit(dataTable)
     ndT <- dataTable
+    ndT <- ndT[, c(-1, -4, -5, -6)]
     ch <- nrow(dataTable)
     c2 <- ch + 1
     for(x in 1:(ch-1))
     {
       if(ndT[x, "unique.tissueid"] == "breast" && ndT[x, "unique.tissueid"] != "" && !is.na(ndT[x, "unique.tissueid"]))
       {
-        new <- data.frame("cellid" = ndT[x, "cellid"], "drugid" = ndT[x, "drugid"], "unique.tissueid" = paste("breast", breastannotation[match(ctrpcellcuration[match(ndT[x, "cellid"], ctrpcellcuration$ctrp.cellid), "unique.cellid"], breastannotation$unique.cellid), "Subtype"], sep = "_"), "auc" = ndT[x, "auc"])
+        new <- data.frame("cellid" = ndT[x, "cellid"], 
+                          "drugid" = ndT[x, "drugid"], 
+                          "unique.tissueid" = paste("breast", breastannotation[match(ndT[x, "cellid"], breastannotation$unique.cellid), "Subtype"], sep = "_"), 
+                          "auc" = ndT[x, "auc"])
         ndT <- rbind(ndT, new)
       }
     }
