@@ -6,9 +6,12 @@ counter <- 1
 # 3 = both 
 # 4 = wordmined
 
-combinedcopy <- combined
+combinedcopy <- combined1
+combinedcopy[is.na(combinedcopy)] <- 0
+wordmine[is.na(wordmine)] <- 0
 colnames(combinedcopy) <- toupper(gsub(badchars, "", colnames(combinedcopy)))
-combinedcopy <- combinedcopy[grep("breast_", rownames(combinedcopy)) * -1, intersect(toupper(gsub(badchars, "", colorectal)), colnames(combinedcopy))]
+combinedcopy <- combinedcopy[grep("breast_", rownames(combinedcopy)) * -1, ]
+
 for(a in unique(breast))
 {
     a <- toupper(gsub(badchars, "", a))
@@ -81,7 +84,7 @@ for(x in rownames(wordmine))
   {
     if(x != "")
     {
-      if(wordmine[x,y] >= 50 && x != "")
+      if(wordmine[x,y] >= 10 && x != "")
       {
         y <- toupper(gsub(badchars, "", y))
         if(nrow(edges[edges$V1 == y & edges$V2 == x,]) == 0)

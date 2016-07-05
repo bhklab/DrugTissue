@@ -1,7 +1,15 @@
-getDrugTests <- function(drug)
+getDrugTests <- function(drug, phase3 = FALSE)
 {
   drug <- drug
-  url <- paste("https://clinicaltrials.gov/search?term=", drug, sep="")
+  path <- paste("drugdata", drug, "", sep = "/")
+  if(phase3)
+  {
+    url <- paste("https://clinicaltrials.gov/search?term=", drug,"+AND+phase+3", sep="")
+  }
+  else
+  {
+    url <- paste("https://clinicaltrials.gov/search?term=", drug,sep="")
+  }
   url <- paste(url, "&studyxml=true", sep="")
   
   cellannotation <- read.csv(file.path("PharmacoGx-Private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#") 
@@ -36,14 +44,20 @@ getDrugTests <- function(drug)
     }
   }
   to <- na.omit(to)
-  if(!file.exists(paste(drug, ".zip", sep="")))
+  if(!file.exists("drugdata"))
   {
-    download.file(url=url, destfile = paste(drug, ".zip", sep=""), mode="wb", quiet = TRUE)
+    dir.create("drugdata", showWarnings=FALSE, recursive=TRUE) 
   }
-  dir.create(drug, showWarnings=FALSE, recursive=TRUE) 
+ 
+  if(!file.exists(paste(path, drug, ".zip", sep="")))
+  {
+    download.file(url=url, destfile = paste(path, drug, ".zip", sep=""), mode="wb", quiet = TRUE)
+  }
+  
+  
   if(file.exists(paste(drug, ".zip", sep="")))
   {
-    unzip(zipfile=paste(drug, ".zip", sep=""), exdir = drug, overwrite = FALSE)
+    unzip(zipfile=paste(path, drug, ".zip", sep=""), exdir = path, overwrite = FALSE)
   }
   else
   {
@@ -51,72 +65,74 @@ getDrugTests <- function(drug)
   }
   
   
-  xmls <- list.files(drug)
+  xmls <- list.files(path)
   trialnums <- length(xmls)
   
   output <- vector()
   zz <- 1;
   for(x in xmls)
   {
-      t <- XML::xmlParse(file.path(drug,x))
+      t <- XML::xmlParse(file.path(path,x))
       u <- XML::xmlSApply(XML::xmlRoot(t), function(x) XML::xmlSApply(x, XML::xmlValue))
       v <- data.frame(t(u),row.names=NULL)
       
-      
-      a <- v[, "brief_summary"]
-      a <- gsub("\r?\n|\r", " ", a)
-      a <- unlist(strsplit(a, split=" "))
-      b <- grep("cancer", a, ignore.case = TRUE, fixed = TRUE)
-      for(i in b)
+      if((phase3 && 3 %in% v$phase$phase[[1]]) || !phase3)
       {
-        if(a[i-1] %in% to)
+        a <- v[, "brief_summary"]
+        a <- gsub("\r?\n|\r", " ", a)
+        a <- unlist(strsplit(a, split=" "))
+        b <- grep("cancer", a, ignore.case = TRUE, fixed = TRUE)
+        for(i in b)
         {
-          #print(a[i-1])
-          output[zz] <- gsub("[[:punct:]]", "", a[i-1])
-          zz <- zz + 1
-        }
-      }
-      
-      for(y in grep("keyword", colnames(v), ignore.case = TRUE))
-      {
-        if(length(grep("cancer", v[, y]$keyword[[1]], ignore.case = TRUE, fixed = TRUE)) > 0)
-        {
-          
-          l<- gsub("[[:punct:]]", "", v[, y]$keyword[[1]])
-          l <- unlist(strsplit(a, split=" "))
-          m <- grep("cancer", l, ignore.case = TRUE, fixed = TRUE)
-          for(i in m)
+          if(a[i-1] %in% to)
           {
-            if(l[i-1] %in% to)
+            #print(a[i-1])
+            output[zz] <- gsub("[[:punct:]]", "", a[i-1])
+            zz <- zz + 1
+          }
+        }
+        
+        for(y in grep("keyword", colnames(v), ignore.case = TRUE))
+        {
+          if(length(grep("cancer", v[, y]$keyword[[1]], ignore.case = TRUE, fixed = TRUE)) > 0)
+          {
+            
+            l<- gsub("[[:punct:]]", "", v[, y]$keyword[[1]])
+            l <- unlist(strsplit(a, split=" "))
+            m <- grep("cancer", l, ignore.case = TRUE, fixed = TRUE)
+            for(i in m)
             {
-              #print(l[i-1])
-              output[zz] <- gsub("[[:punct:]]", "", l[i-1])
-              zz <- zz + 1
+              if(l[i-1] %in% to)
+              {
+                #print(l[i-1])
+                output[zz] <- gsub("[[:punct:]]", "", l[i-1])
+                zz <- zz + 1
+              }
             }
           }
         }
-      }
-      
-      for(y in grep("condition", colnames(v), ignore.case = TRUE))
-      {
-        if(length(grep("cancer", v[, y]$keyword[[1]], ignore.case = TRUE, fixed = TRUE)) > 0)
+        
+        for(y in grep("condition", colnames(v), ignore.case = TRUE))
         {
-          
-          l<- gsub("[[:punct:]]", "", v[, y]$keyword[[1]])
-          l <- unlist(strsplit(a, split=" "))
-          m <- grep("cancer", l, ignore.case = TRUE, fixed = TRUE)
-          for(i in m)
+          if(length(grep("cancer", v[, y]$keyword[[1]], ignore.case = TRUE, fixed = TRUE)) > 0)
           {
-            if(l[i-1] %in% to)
+            
+            l<- gsub("[[:punct:]]", "", v[, y]$keyword[[1]])
+            l <- unlist(strsplit(a, split=" "))
+            m <- grep("cancer", l, ignore.case = TRUE, fixed = TRUE)
+            for(i in m)
             {
-              #print(l[i-1])
-              output[zz] <- gsub("[[:punct:]]", "", l[i-1])
-              zz <- zz + 1
+              if(l[i-1] %in% to)
+              {
+                #print(l[i-1])
+                output[zz] <- gsub("[[:punct:]]", "", l[i-1])
+                zz <- zz + 1
+              }
             }
           }
         }
+        #output <- unique(output)
       }
-      #output <- unique(output)
   }
   th <- output
   

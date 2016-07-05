@@ -322,14 +322,14 @@
   
   combined1 <- melt(as.matrix(combined1))
   combined1 <- na.omit(combined1)
-  combined1$value <- p.adjust(combined1$value)
+  combined1$value <- p.adjust(combined1$value, method = "fdr")
   combined1 <- dcast(combined1, Var1 ~ Var2)
   rownames(combined1) <- combined1$Var1
   combined1 <- combined1[, -1]
   
   for(a in colnames(combined2))
   {
-    combined2[,a] <- p.adjust(combined2[,a])
+    combined2[,a] <- p.adjust(combined2[,a], method = "fdr")
   }
   
   save(combined1, file = paste(path.data, "p values 10k global adjust.RData", sep = "/"))

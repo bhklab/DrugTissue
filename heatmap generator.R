@@ -1,7 +1,7 @@
-combinedcopy <- combined1
+combinedcopy <- combined1[, c("Topotecan", "17-AAG", "Irinotecan", "paclitaxel", "Panobinostat")]
 
 colnames(combinedcopy) <- toupper(gsub(badchars, "", colnames(combinedcopy)))
-combinedcopy <- combinedcopy[grep("breast", rownames(combinedcopy)), intersect(toupper(gsub(badchars, "", breast)), colnames(combinedcopy))]
+combinedcopy <- combinedcopy[grep("breast_", rownames(combinedcopy)) * -1, ]
 ccc <- combinedcopy
 
 for(x in rownames(ccc))
@@ -108,9 +108,9 @@ cccm$value <- as.factor(cccm$value)
 cccm <- na.omit(cccm)
 cccm$value <- as.factor(cccm$value)
 
-ggplot(cccm, aes(cccm$Var2, cccm$Var1) ) + geom_tile(aes(fill = cccm$value), color = "black") + 
-  scale_fill_manual(name = "p value", values = rev(brewer.pal(5,"Blues")),limits = rev(c("Not Significant", "< 0.10", "< 0.05", "< 0.01", "< 0.001")), drop = FALSE) + 
-  labs(x = "drugs", y = "cellines") + 
-  scale_x_discrete(limits = colnames(ccc)[h$colInd]) +
-  scale_y_discrete(limits = rownames(ccc)[h$rowInd]) +
-  theme(axis.text.x = element_text(angle = 270, hjust = 1, size = 15), axis.text.y = element_text(size = 20))  + coord_fixed(ratio = 1.5)
+ggplot(cccm) + geom_tile(aes(fill = cccm$value, x = cccm$Var1, y = cccm$Var2), color = "black") + 
+  scale_fill_manual(name = "p value", values = rev(brewer.pal(5,"Oranges")),limits = rev(c("Not Significant", "< 0.10", "< 0.05", "< 0.01", "< 0.001")), drop = FALSE) + 
+  labs(x = "", y = "") + 
+  scale_y_discrete(limits = colnames(ccc)[h$colInd]) +
+  scale_x_discrete(limits = rownames(ccc)[h$rowInd]) +
+  theme(axis.text.x = element_text(angle = 270, hjust = 1, size = 15), axis.text.y = element_text(size = 20))
