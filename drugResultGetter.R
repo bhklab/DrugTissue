@@ -1,18 +1,24 @@
 getDrugTests <- function(drug, phase3 = FALSE)
 {
+  if(!require(XML))
+  {
+    install.packages("XML")
+  }
+  
+  library(XML)
+  options(stringsAsFactors = FALSE)
   drug <- drug
-  path <- paste("drugdata", drug, "", sep = "/")
+  path <- paste("./drugdata", drug, "", sep = "/")
   if(phase3)
   {
     url <- paste("https://clinicaltrials.gov/search?term=", drug,"+AND+phase+3", sep="")
-  }
-  else
+  }else
   {
     url <- paste("https://clinicaltrials.gov/search?term=", drug,sep="")
   }
   url <- paste(url, "&studyxml=true", sep="")
   
-  cellannotation <- read.csv(file.path("PharmacoGx-Private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#") 
+  cellannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#") 
   tissues <- cellannotation[, grep("tissue", colnames(cellannotation))]
   to <- vector()
   
@@ -48,24 +54,26 @@ getDrugTests <- function(drug, phase3 = FALSE)
   {
     dir.create("drugdata", showWarnings=FALSE, recursive=TRUE) 
   }
+  
+  if(!file.exists(path))
+  {
+    dir.create(path, showWarnings = FALSE, recursive= TRUE)
+  }
  
   if(!file.exists(paste(path, drug, ".zip", sep="")))
   {
     download.file(url=url, destfile = paste(path, drug, ".zip", sep=""), mode="wb", quiet = TRUE)
   }
   
-  
-  if(file.exists(paste(drug, ".zip", sep="")))
+  if(file.exists(paste0(path, drug, ".zip", sep="")) && file.info(paste0(path, drug, ".zip", sep=""))$size > 0)
   {
     unzip(zipfile=paste(path, drug, ".zip", sep=""), exdir = path, overwrite = FALSE)
-  }
-  else
+  }else
   {
     return(NA)
   }
   
-  
-  xmls <- list.files(path)
+  xmls <- list.files(path, pattern = "\\.xml$")
   trialnums <- length(xmls)
   
   output <- vector()
