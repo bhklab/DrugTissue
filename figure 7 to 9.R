@@ -87,6 +87,7 @@ draw.triple.venn(
   n23 = length(intersect(vitro, wrdm)),
   n123 = length(intersect(intersect(vitro, wrdm), jaeger)),
   category = c("jaeger et al", "in vitro", "wordmined"),
+  cat.cex = c(2,2,2)
 )
 
 #colorectal

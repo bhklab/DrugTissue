@@ -1,5 +1,6 @@
 library(VennDiagram)
 
+pdf("figure2drugs.pdf")
 #figure 2 drugs
 draw.quad.venn(
   area1 = nrow(CCLE@drug),
@@ -17,9 +18,13 @@ draw.quad.venn(
   n134 = length(intersect(intersect(rownames(CCLE@drug), rownames(CTRPv2@drug)), rownames(gCSI@drug))),
   n234 = length(intersect(intersect(rownames(GDSC@drug), rownames(CTRPv2@drug)), rownames(gCSI@drug))), 
   n1234 = length(intersect(intersect(rownames(CCLE@drug), rownames(GDSC@drug)), intersect(rownames(CTRPv2@drug), rownames(gCSI@drug)))), 
-  category = c("CCLE", "GDSC", "CTRPv2", "gCSI")
+  category = c("CCLE", "GDSC", "CTRPv2", "gCSI"),
+  cat.cex = 2,
+  cex = 2
 )
+dev.off()
 
+pdf("figure2cells.pdf")
 #figure 2 cells
 draw.quad.venn(
   area1 = nrow(CCLE@cell),
@@ -37,9 +42,13 @@ draw.quad.venn(
   n134 = length(intersect(intersect(CCLE@cell$cellid, CTRPv2@cell$cellid), gCSI@cell$unique.id)),
   n234 = length(intersect(intersect(GDSC@cell$cellid, CTRPv2@cell$cellid), gCSI@cell$unique.id)), 
   n1234 = length(intersect(intersect(CCLE@cell$cellid, GDSC@cell$cellid), intersect(CTRPv2@cell$cellid, gCSI@cell$unique.id))), 
-  category = c("CCLE", "GDSC", "CTRPv2", "gCSI")
+  category = c("CCLE", "GDSC", "CTRPv2", "gCSI"),
+  cat.cex = 2, 
+  cex = 2
 )
+dev.off()
 
+pdf("figure2tissue.pdf")
 #figure 2 tissue types
 draw.quad.venn(
   area1 = length(unique(na.omit(CCLE@cell$tissueid))),
@@ -57,5 +66,8 @@ draw.quad.venn(
   n134 = length(intersect(intersect(na.omit(CCLE@cell$tissueid), CTRPv2@cell$tissueid[CTRPv2@cell$tissueid != ""]), gCSI@cell$tissueid[gCSI@cell$tissueid != ""])),
   n234 = length(intersect(intersect(na.omit(GDSC@cell$tissueid), CTRPv2@cell$tissueid[CTRPv2@cell$tissueid != ""]), gCSI@cell$tissueid[gCSI@cell$tissueid != ""])), 
   n1234 = length(intersect(intersect(na.omit(CCLE@cell$tissueid), na.omit(GDSC@cell$tissueid)), intersect(CTRPv2@cell$tissueid[CTRPv2@cell$tissueid != ""], gCSI@cell$tissueid[gCSI@cell$tissueid != ""]))), 
-  category = c("CCLE", "GDSC", "CTRPv2", "gCSI")
+  category = c("CCLE", "GDSC", "CTRPv2", "gCSI"),
+  cex = 2,
+  cat.cex = 2
 )
+dev.off()
