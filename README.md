@@ -1,6 +1,8 @@
 # TissueDrug
 
-load CTRPv2, CCLE, GDSC, and gCSI
+this set of scripts was written and run on a CentOS7 machine
+
+load CTRPv2, CCLE, GDSC, and gCSI using the downloadPSet functions in PharmacoGx
 
 run GSEA_with_AUC.R to get enrichment scores in one matrix
 
