@@ -76,26 +76,10 @@ run `GSEA_with_AUC.R` to get enrichment scores in one matrix variable called `co
 
 load the XML clinicaltrials.gov reader from `drugResultGetter.R` , and run `wordmine.R` to generate the `wordmine` variable referenced in diagram generation 
 
-all figures should run independently with automatic pdf generation in working directory set using `setWD()`
+all figures are generated through their respective R file and should run independently with varying pdf generation in working directory set using `setWD()`
+
+`figure 5d.R` generates the data for figure 5d, which should then be exported into cytoscape for network visualization
 
 Figure 1 was manually created using Microsoft Word
-
-`figure 2a.R` generates figure 2A 
-
-`figure 2b.R` generated figure 2B
-
-`figure 2c.R` generated figure 2C
-
-`figure 3.R` generates 6 pdfs, representing the top 3 and bottom 3 drugs with strong and weak correlations respectively 
-
-`figure 4a.R` generates figure 4A
-
-`figure 4c.R` generates the data for figure 4C, which should then be exported into cytoscape for network visualization 
-
-`supplementary 2.R` generates data for the supplementary 2 figure in a `combined1n` variable 
-
-`supplementary file 1.R` generates supplementary file 1
-
-`supplementary file 2.R` generates supplementary file 2
 
 supplementary file 3 is generated at the end of `GSEA_with_AUC.R`
