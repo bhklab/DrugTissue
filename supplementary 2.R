@@ -79,9 +79,14 @@ for(d in dataSets)
         wt[a, dr] <- length(grep(a, ndT[, "unique.tissueid"]))
       }
       
-      if(length(grep(a, ndT[, "unique.tissueid"])) < 5 || a == "")
+      if(a == "")
       {
         ndT <- ndT[ndT$unique.tissueid != a, ]
+      }
+      else if(length(grep(a, ndT[, "unique.tissueid"])) < 5 )
+      {
+        ndT <- ndT[ndT$unique.tissueid != a, ]
+        gseav[a, dr] <- 1
       }
     }
     
@@ -143,21 +148,11 @@ for(d in dataSets)
   counter <- counter + 1
 }
 
-
-druglist <- list()
-celltypelist <- list()
-
-for(j in ml)
-{
-  druglist <- c(druglist, colnames(j))
-  celltypelist <- c(celltypelist, rownames(j))
-}
-
 mwc <- mw
 
-combined <- data.frame(matrix(ncol = length(unique(druglist)), nrow = length(unique(celltypelist))))
-colnames(combined) <- unique(druglist)
-rownames(combined) <- unique(celltypelist)
+combined <- data.frame(matrix(ncol = length(drugsubset), nrow = length(unique(NCI60@cell$tissueid))))
+colnames(combined) <- drugsubset
+rownames(combined) <- unique(NCI60@cell$tissueid)
 
 #go through master table and get data from list of tables
 for(i in rownames(combined))
