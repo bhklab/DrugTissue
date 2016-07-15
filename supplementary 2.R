@@ -1,7 +1,6 @@
 library(ggplot2)
 library(mgcv)
 library(reshape2)
-library(gridExtra)
 library(grid)
 library(gplots)
 library(RColorBrewer)
@@ -14,10 +13,16 @@ options(digits = 9)
 
 path.data=file.path("data", "analysis")
 
+badchars <- "[\xb5]|[]|[ ,]|[;]|[:]|[-]|[+]|[*]|[%]|[$]|[#]|[{]|[}]|[[]|[]]|[|]|[\\^]|[/]|[\\]|[.]|[_]|[ ]"
+
 cellannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#")
 breastannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "brca_cell_lines_all.csv"), sep=",", comment.char="#")
-dataSets <- c(GDSC, gCSI, CCLE)
+dataSets <- c(NCI60)
 drugs <- list()
+
+drugsubset <- c(rownames(NCI60@curation$drug[NCI60@curation$drug$unique.drugid %in% colnames(combined1), ]))
+drugsubset <- unique(drugsubset)
+
 
 mw <- list()
 counter <- 1
@@ -25,12 +30,12 @@ ml <- list()
 
 for(d in dataSets)
 {
-  gseav <- data.frame(matrix(ncol = length(rownames(d@drug)), nrow = length(na.omit(unique(d@cell$tissueid)))))
+  gseav <- data.frame(matrix(ncol = length(drugsubset), nrow = length(unique(na.omit(d@cell$tissueid)))))
   rownames(gseav) <- na.omit(unique(d@cell$tissueid))
-  colnames(gseav) <- rownames(d@drug)
+  colnames(gseav) <- drugsubset
   wt <- gseav
   
-  for(dr in rownames(d@drug))
+  for(dr in drugsubset)
   {
     c2 <- 1
     message(paste(d@annotation$name, dr, sep = " "))
@@ -51,6 +56,7 @@ for(d in dataSets)
     }
     
     dataTable[, "unique.tissueid"] <- cellannotation[match(dataTable$cell_line, cellannotation[, "unique.cellid"]), "unique.tissueid"]
+    
     ndT <- dataTable
     ch <- c2
     for(x in 1:(ch-1))
@@ -92,6 +98,7 @@ for(d in dataSets)
       #pass into piano 
       
       #ndT[,3] <- 1/ndT[,3]
+      ndT[,3] <- as.numeric(ndT[,3])
       ndT[,3] <- log10(ndT[,3])
       ndT <- ndT[order(ndT[,3]),]
       
@@ -100,7 +107,14 @@ for(d in dataSets)
       gset <- ndT[, c(1,2)]
       gset <- loadGSC(gset)
       
-      ndTc <- ndT[grep("breast_", ndT$unique.tissueid) * -1, ]
+      if(TRUE %in% grepl("breast_", ndT$unique.tissueid))
+      {
+        ndTc <- ndT[grep("breast_", ndT$unique.tissueid) * -1, ]
+      }
+      else
+      {
+        ndTc <- ndT
+      }
       input <- ndTc[,3]
       names(input) <- ndTc[,1]
       
@@ -129,106 +143,6 @@ for(d in dataSets)
   counter <- counter + 1
 }
 
-save(ml, file = "./amlb.RData")
-save(mw, file = "./amwb.RData")
-
-#ctrp goes here
-counter <- length(dataSets) + 1
-gseav <- data.frame(matrix(ncol = length(rownames(CTRPv2@drug)), nrow = length(na.omit(unique(CTRPv2@cell$tissueid)))))
-rownames(gseav) <- na.omit(unique(CTRPv2@cell$tissueid))
-colnames(gseav) <- rownames(CTRPv2@drug)
-wt <- gseav
-for(dr in CTRPv2@drug$drugid)
-{
-  message(paste("CTRP", dr, sep = " "))
-  dataTable <- CTRPv2@sensitivity$info[CTRPv2@sensitivity$info$drugid == dr, ]
-  dataTable[, "unique.tissueid"] <- CTRPv2@cell[match(dataTable$cellid, CTRPv2@cell$cellid), "tissueid"]
-  dataTable[, "auc"] <- CTRPv2@sensitivity$profiles[rownames(dataTable), "auc_recomputed"]
-  dataTable <- na.omit(dataTable)
-  ndT <- dataTable
-  ndT <- ndT[, c(-1, -4, -5, -6)]
-  ch <- nrow(dataTable)
-  c2 <- ch + 1
-  for(x in 1:(ch-1))
-  {
-    if(ndT[x, "unique.tissueid"] == "breast" && ndT[x, "unique.tissueid"] != "" && !is.na(ndT[x, "unique.tissueid"]))
-    {
-      new <- data.frame("cellid" = ndT[x, "cellid"], 
-                        "drugid" = ndT[x, "drugid"], 
-                        "unique.tissueid" = paste("breast", breastannotation[match(ndT[x, "cellid"], breastannotation$unique.cellid), "Subtype"], sep = "_"), 
-                        "auc" = ndT[x, "auc"])
-      ndT <- rbind(ndT, new)
-    }
-  }
-  
-  ndT <- na.omit(ndT)
-  
-  for(a in unique(ndT[, "unique.tissueid"]))
-  {
-    if(a != "")
-    {
-      wt[a, dr] <- length(grep(a, ndT[, "unique.tissueid"]))
-    }
-    
-    if(length(grep(a, ndT[, "unique.tissueid"])) < 5 || a == "")
-    {
-      ndT <- ndT[ndT$unique.tissueid != a, ]
-    }
-  }
-  
-  ndT <- ndT[order(ndT$unique.tissueid), ]
-  ndTf <- ndT
-  
-  ndT <- ndTf
-  if(nrow(ndT) > 0)
-  {
-    #linear readjustment to center around 0
-    #ndT[,3] <- as.numeric(ndT[,3])
-    #ndT[, 3] <- ndT[,3] - (max(ndT[,3]) + min(ndT[,3]))/2
-    
-    #pass into piano 
-    ndT <- ndT[, -2]
-    ndT[,3] <- log10(ndT[,3])
-    ndT <- ndT[order(ndT[,3]),]
-    ndT[,3] <- 1:nrow(ndT)
-    
-    gset <- ndT[, c(1,2)]
-    gset <- loadGSC(gset)
-    ndTc <- ndT
-    if(length(grep("breast_", ndT$unique.tissueid)) > 0)
-    {
-      ndTc <- ndT[grep("breast_", ndT$unique.tissueid) * -1, ]
-    }
-    
-    input <- ndTc[,3]
-    names(input) <- ndTc[,1]
-    
-    output <- runGSA(input, gsc = gset, verbose = FALSE, nPerm = 10000)
-    
-    #write value to table 
-    output <- GSAsummaryTable(output)
-    
-    for(x in 1:nrow(output))
-    {
-      if(length(output[x, "p (non-dir.)"]) == 0)
-      {
-        gseav[output[x, "Name"], dr] <- NA
-      }
-      else
-      {
-        gseav[output[x, "Name"], dr] <- output[x, "p (non-dir.)"]
-      }
-    }
-  }
-}
-mw[[counter]] <- wt
-names(mw)[counter] <- "CTRP"
-ml[[counter]] <- gseav
-names(ml)[counter] <- "CTRP"
-counter <- counter + 1
-
-save(ml, file = "./amla.RData")
-save(mw, file = "./amwa.RData")
 
 druglist <- list()
 celltypelist <- list()
@@ -282,20 +196,11 @@ for(i in rownames(combined))
     combined[i, j] <- combine.test(pvs, weight = sw, method = "z.transform")
   }
 }
-combined1 <- combined
-combined2 <- combined
+combined1n<- combined
 
-combined1 <- melt(as.matrix(combined1))
-combined1 <- na.omit(combined1)
-combined1$value <- p.adjust(combined1$value, method = "fdr")
-combined1 <- dcast(combined1, Var1 ~ Var2)
-rownames(combined1) <- combined1$Var1
-combined1 <- combined1[, -1]
-
-for(a in colnames(combined2))
-{
-  combined2[,a] <- p.adjust(combined2[,a])
-}
-
-write.xlsx(combined1, file = "suppfile3.xlsx")
-
+combined1n <- melt(as.matrix(combined1n))
+combined1n <- na.omit(combined1n)
+combined1n$value <- p.adjust(combined1n$value, method = "fdr")
+combined1n <- dcast(combined1n, Var1 ~ Var2)
+rownames(combined1n) <- combined1n$Var1
+combined1n <- combined1n[, -1]

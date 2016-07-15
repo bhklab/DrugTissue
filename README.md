@@ -80,13 +80,15 @@ all figures should run independently with automatic pdf generation in working di
 
 Figure 1 was manually created using Microsoft Word
 
-`figure 2A.R` generates figure 2A 
+`figure 2a.R` generates figure 2A 
 
-`figure 2B.R` generated figure 2B
+`figure 2b.R` generated figure 2B
+
+`figure 2c.R` generated figure 2C
 
 `figure 3.R` generates 6 pdfs, representing the top 3 and bottom 3 drugs with strong and weak correlations respectively 
 
-`figure 4A.R` generates figure 4A
+`figure 4a.R` generates figure 4A
 
 `figure 4c.R` generates the data for figure 4C, which should then be exported into cytoscape for network visualization 
 
@@ -96,4 +98,4 @@ Figure 1 was manually created using Microsoft Word
 
 `supplementary file 2.R` generates supplementary file 2
 
-supplementary table 1 can be created simply by exporting the `combined1` variable generated from the end of `GSEA_with_AUC.R`
+supplementary file 3 is generated at the end of `GSEA_with_AUC.R`
