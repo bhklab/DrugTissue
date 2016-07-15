@@ -70,9 +70,9 @@ Running R Scripts in Repository and figure generation
 -------------------------------
 it is mandatory for all scripts to be run within one RStudio instance, as scripts will reference generated output variables from other script files
 
-load CTRPv2, CCLE, GDSC, and gCSI using the downloadPSet functions in PharmacoGx
+load CTRPv2, CCLE, GDSC, and gCSI using the `downloadPSet()` functions in PharmacoGx
 
-run GSEA_with_AUC.R to get enrichment scores in one matrix variable called `combined1`
+run `GSEA_with_AUC.R` to get enrichment scores in one matrix variable called `combined1`
 
 load the XML clinicaltrials.gov reader from drugResultGetter.R , and run wordmine.R to generate the `wordmine` variable referenced in diagram generation 
 
@@ -89,3 +89,11 @@ Figure 1 was manually created using Microsoft Word
 `figure 4A.R` generates figure 4A
 
 `figure 4c.R` generates the data for figure 4C, which should then be exported into cytoscape for network visualization 
+
+`supplementary 2.R` generates data for the supplementary 2 figure in a `combined1n` variable 
+
+`supplementary file 1.R` generates supplementary file 1
+
+`supplementary file 2.R` generates supplementary file 2
+
+supplementary table 1 can be created simply by exporting the `combined1` variable generated from the end of `GSEA_with_AUC.R`
