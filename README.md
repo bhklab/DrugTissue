@@ -26,6 +26,7 @@ Set up the software environment (needs to be updated)
 
 We developed and tested our analysis pipeline using R running on linux and Mac OSX platforms. The following is a copy of sessionInfo() from the development environment in R
 
+```
 R version 3.3.0 (2016-05-03)
 Platform: x86_64-redhat-linux-gnu (64-bit)
 Running under: CentOS Linux 7 (Core)
@@ -59,10 +60,11 @@ loaded via a namespace (and not attached):
 [37] magrittr_1.5         cluster_2.0.4        futile.options_1.0.0
 [40] MASS_7.3-45          Matrix_1.2-6         downloader_0.4      
 [43] igraph_1.0.1 
+```
 
-All these packages are available on CRAN (http://cran.r-project.org) or Bioconductor (http://www.bioconductor.org)
+All these packages are available on [CRAN](http://cran.r-project.org) or [Bioconductor](http://www.bioconductor.org)
 
-all nessesary packages have library(<package>) calls within the R scripts themselves, or the script assumes a previous script has been run and thus should have loaded nessesary packages. 
+all nessesary packages have `library(<package>)` calls within the R scripts themselves, or the script assumes a previous script has been run and thus should have loaded nessesary packages. 
 
 Running R Scripts in Repository and figure generation
 -------------------------------
@@ -70,12 +72,20 @@ it is mandatory for all scripts to be run within one RStudio instance, as script
 
 load CTRPv2, CCLE, GDSC, and gCSI using the downloadPSet functions in PharmacoGx
 
-run GSEA_with_AUC.R to get enrichment scores in one matrix, named combined1
+run GSEA_with_AUC.R to get enrichment scores in one matrix variable called `combined1`
 
-load the XML clinicaltrials.gov reader from drugResultGetter.R , and run wordmine.R to generate a wordmine variable referenced in diagram generation 
+load the XML clinicaltrials.gov reader from drugResultGetter.R , and run wordmine.R to generate the `wordmine` variable referenced in diagram generation 
 
-all figures in their names figures.R files should run independently (Ctrl - A, run) , although any venn diagram generation doesnt seem to wipe the previous figure and just superimposes it
+all figures should run independently with automatic pdf generation in working directory set using `setWD()`
 
-all figures write to the plot window in RStudio. A simple addition would be to add the call pdf("figure.pdf") and dev.off() around every figure call to write directly to pdf. 
+Figure 1 was manually created using Microsoft Word
 
-to generate the circos plot export the edges matrix generated at the end of "cytoscape edges.R" and import into cytoscape.  
+`figure 2A.R` generates figure 2A 
+
+`figure 2B.R` generated figure 2B
+
+`figure 3.R` generates 6 pdfs, representing the top 3 and bottom 3 drugs with strong and weak correlations respectively 
+
+`figure 4A.R` generates figure 4A
+
+`figure 4c.R` generates the data for figure 4C, which should then be exported into cytoscape for network visualization 
