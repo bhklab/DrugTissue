@@ -74,7 +74,7 @@ load CTRPv2, CCLE, GDSC, and gCSI using the `downloadPSet()` functions in Pharma
 
 run `GSEA_with_AUC.R` to get enrichment scores in one matrix variable called `combined1`
 
-load the XML clinicaltrials.gov reader from drugResultGetter.R , and run wordmine.R to generate the `wordmine` variable referenced in diagram generation 
+load the XML clinicaltrials.gov reader from `drugResultGetter.R` , and run `wordmine.R` to generate the `wordmine` variable referenced in diagram generation 
 
 all figures should run independently with automatic pdf generation in working directory set using `setWD()`
 
