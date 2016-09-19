@@ -127,7 +127,7 @@ for(drgs in cmb)
     ggplot(test3, aes(as.factor(test3$tissue), test3$auc)) + 
     geom_boxplot(outlier.colour = NA, aes(color = test3$sig)) + 
     labs(x = "tissue type", y = "recomputed AUC") + 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 15), 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 15), 
           axis.text.y = element_text(size = 15), 
           axis.title=element_text(size=15),
           legend.title = element_text(size = 15),
