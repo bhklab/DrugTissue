@@ -1,4 +1,4 @@
-FROM centos
+FROM centos:latest
 
 RUN sh -c '/bin/echo -e "y" | yum -y update' 
 

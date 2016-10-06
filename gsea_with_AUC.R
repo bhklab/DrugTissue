@@ -14,14 +14,25 @@ options(digits = 9)
 
 path.data=file.path("data", "analysis")
 
-cellannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#")
-breastannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "brca_cell_lines_all.csv"), sep=",", comment.char="#")
-dataSets <- c(GDSC, gCSI, CCLE)
+args <- commandArgs(trailingOnly = TRUE)
+path <- args[1]
+
+cellannotation <- read.csv(file.path(path, "cell_annotation_all.csv"), sep=",", comment.char="#")
+breastannotation <- read.csv(file.path(path, "brca_cell_lines_all.csv"), sep=",", comment.char="#")
+
+GDSC1000 <- downloadPSet("GDSC")
+gCSI <- downloadPSet("gCSI")
+CCLE <- downloadPSet("CCLE")
+
+dataSets <- c(GDSC1000, gCSI, CCLE)
 drugs <- list()
 
 mw <- list()
 counter <- 1
 ml <- list()
+
+#removes lymphoid tissue from dataset analysis due to oversensitivity to everything 
+paper <- FALSE
 
 for(d in dataSets)
 {
@@ -51,6 +62,16 @@ for(d in dataSets)
     }
     
     dataTable[, "unique.tissueid"] <- cellannotation[match(dataTable$cell_line, cellannotation[, "unique.cellid"]), "unique.tissueid"]
+    
+    ###RESPONSE LINE PLEASE REMOVE LATER###
+    if(paper)
+    {
+      dataTable <- dataTable[grep("lymphoid", dataTable$unique.tissueid) * -1, ]
+    }
+   
+    
+    ### RESPONSE LINE ###
+    
     ndT <- dataTable
     ch <- c2
     for(x in 1:(ch-1))
@@ -132,6 +153,9 @@ for(d in dataSets)
 save(ml, file = "./amlb.RData")
 save(mw, file = "./amwb.RData")
 
+
+CTRPv2 <- downloadPSet("CTRPv2") #currently doesnt work
+
 #ctrp goes here
 counter <- length(dataSets) + 1
 gseav <- data.frame(matrix(ncol = length(rownames(CTRPv2@drug)), nrow = length(na.omit(unique(CTRPv2@cell$tissueid)))))
@@ -145,6 +169,7 @@ for(dr in CTRPv2@drug$drugid)
   dataTable[, "unique.tissueid"] <- CTRPv2@cell[match(dataTable$cellid, CTRPv2@cell$cellid), "tissueid"]
   dataTable[, "auc"] <- CTRPv2@sensitivity$profiles[rownames(dataTable), "auc_recomputed"]
   dataTable <- na.omit(dataTable)
+  
   ndT <- dataTable
   ndT <- ndT[, c(-1, -4, -5, -6)]
   ch <- nrow(dataTable)
@@ -177,6 +202,10 @@ for(dr in CTRPv2@drug$drugid)
   }
   
   ndT <- ndT[order(ndT$unique.tissueid), ]
+  if(paper)
+  {
+    ndT <- ndT[grep("lymphoid", ndT$unique.tissueid) * -1 , ]
+  }
   ndTf <- ndT
   
   ndT <- ndTf
@@ -298,4 +327,5 @@ for(a in colnames(combined2))
 }
 
 write.xlsx(combined1, file = "suppfile3.xlsx")
+save(combined1, file = "combined1.Rdata")
 
