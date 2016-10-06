@@ -15,12 +15,12 @@ path.data=file.path("data", "analysis")
 
 badchars <- "[\xb5]|[]|[ ,]|[;]|[:]|[-]|[+]|[*]|[%]|[$]|[#]|[{]|[}]|[[]|[]]|[|]|[\\^]|[/]|[\\]|[.]|[_]|[ ]"
 
-cellannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#")
-breastannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "brca_cell_lines_all.csv"), sep=",", comment.char="#")
+cellannotation <- read.csv(file.path("~/Documents/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#")
+breastannotation <- read.csv(file.path("~/Documents", "brca_cell_lines_all.csv"), sep=",", comment.char="#")
 dataSets <- c(NCI60)
 drugs <- list()
 
-drugsubset <- c(rownames(NCI60@curation$drug[NCI60@curation$drug$unique.drugid %in% colnames(combined1), ]))
+drugsubset <- c(rownames(NCI60@curation$drug))
 drugsubset <- unique(drugsubset)
 
 
