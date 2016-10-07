@@ -127,7 +127,7 @@ for(a in 1:nrow(c2))
 vitro <- unique(vitro)
 vitro <- toupper(gsub(badchars, "", vitro))
 
-pdf("figure9.pdf", paper = "a4")
+pdf("figure5c.pdf", paper = "a4")
 draw.triple.venn(
   area1 = length(jaeger),
   area2 = length(vitro),

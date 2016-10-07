@@ -194,3 +194,4 @@ for(a in 1:nrow(edges))
 }
 
 edges <- na.omit(edges)
+write.table(edges, file = "figure5d.csv", sep = ",")

@@ -12,13 +12,13 @@ for(c in rownames(combined1))
 boxp[, "percentage"] <- as.numeric(boxp[, "percentage"] * 100)
 boxlevel <- rownames(boxp)[order(boxp[,"percentage"])]
 
-
+pdf("figure3a.pdf")
 ggplot(data = boxp, aes(x = rownames(boxp), y = percentage)) + 
   geom_bar(stat="identity") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 10)) +
   scale_x_discrete(limits=boxlevel) +
   labs(x = "tissue type")
-
+dev.off()
 
 #spearman correlation
 boxp <- boxp[grep("breast_", rownames(boxp)) * -1, ]

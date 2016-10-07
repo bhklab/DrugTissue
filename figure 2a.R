@@ -66,6 +66,7 @@ linenums$`tissue type` <- gsub("_", " ", linenums$`tissue type`)
 
 linenums$`tissue type` <- as.factor(linenums$`tissue type`)
 
+pdf("figure2a.pdf")
 ggplot(linenums, aes(x = linenums$`tissue type`, y = linenums$value, fill=linenums$dataset)) + 
   geom_bar(stat = "identity", position="dodge") + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 10), axis.text.y = element_text(size = 10), axis.title=element_text(size=10)) +
@@ -73,4 +74,5 @@ ggplot(linenums, aes(x = linenums$`tissue type`, y = linenums$value, fill=linenu
   scale_x_discrete(limits = gsub("_", " ", order)) + 
   labs(x = NULL, y = "number of cell lines") +
   theme(legend.text=element_text(size=10))
+dev.off()
   

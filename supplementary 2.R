@@ -199,3 +199,5 @@ combined1n$value <- p.adjust(combined1n$value, method = "fdr")
 combined1n <- dcast(combined1n, Var1 ~ Var2)
 rownames(combined1n) <- combined1n$Var1
 combined1n <- combined1n[, -1]
+
+write.table(t(combined1n), file = "suppfile3.csv", sep = ",")
