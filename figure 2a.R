@@ -1,6 +1,6 @@
 linenums <- as.data.frame(matrix(ncol = 4, nrow = nrow(combined1)))
 rownames(linenums) <- rownames(combined1)
-colnames(linenums) <- c("CCLE", "GDSC", "CTRPv2", "gCSI")
+colnames(linenums) <- c("CCLE", "GDSC1000", "CTRPv2", "gCSI")
 linenums[is.na(linenums)] <- 0
 
 for(y in 1:nrow(CCLE@cell))
@@ -13,13 +13,20 @@ for(y in 1:nrow(CCLE@cell))
     }
   }
 }
-for(y in 1:nrow(GDSC@cell))
+for(y in 1:nrow(GDSC1000@cell))
 {
-  if(length(grep(GDSC@cell$cellid[y], rownames(na.omit(GDSC@sensitivity$profiles)))) > 0)
+  if(length(grep(GDSC1000@cell$cellid[y], rownames(na.omit(GDSC1000@sensitivity$profiles)))) > 0)
   {
-    if(!is.na(GDSC@cell$tissueid[y]))
+    if(!is.na(GDSC1000@cell$tissueid[y]))
     {
-      linenums[GDSC@cell$tissueid[y], "GDSC"] <- linenums[GDSC@cell$tissueid[y], "GDSC"] + 1
+      if(GDSC1000@cell$tissueid[y] == "esophagus")
+      {
+        linenums["oesophagus", "GDSC1000"] <- linenums["oesophagus", "GDSC1000"] + 1
+      }
+      else
+      {
+        linenums[GDSC1000@cell$tissueid[y], "GDSC1000"] <- linenums[GDSC1000@cell$tissueid[y], "GDSC1000"] + 1
+      }
     }
   }
 }
@@ -48,6 +55,8 @@ for(y in 1:nrow(gCSI@cell))
 linenums <- linenums[grep("breast_", rownames(linenums)) * -1, ]
 linenums <- na.omit(linenums)
 
+linesnumscp <- linenums
+
 for(x in 1:nrow(linenums))
 {
   linenums[x, "median"] <- median(as.numeric(linenums[x, 1:4]))
@@ -69,7 +78,7 @@ linenums$`tissue type` <- as.factor(linenums$`tissue type`)
 pdf("figure2a.pdf")
 ggplot(linenums, aes(x = linenums$`tissue type`, y = linenums$value, fill=linenums$dataset)) + 
   geom_bar(stat = "identity", position="dodge") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 10), axis.text.y = element_text(size = 10), axis.title=element_text(size=10)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10), axis.text.y = element_text(size = 10), axis.title=element_text(size=10)) +
   guides(fill=guide_legend(title="")) +
   scale_x_discrete(limits = gsub("_", " ", order)) + 
   labs(x = NULL, y = "number of cell lines") +

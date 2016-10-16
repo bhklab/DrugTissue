@@ -20,31 +20,32 @@ breastannotation <- read.csv(file.path("~/Documents", "brca_cell_lines_all.csv")
 dataSets <- c(NCI60)
 drugs <- list()
 
-#setting this to TRUE generates supplementary file 3, FALSE for 4
-subset <- TRUE
+path.input <- "~/Downloads"
 
-#supplementary file 3 is used to generate supplementary figure 2
+breast <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Breast cancer")
+colorectal <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Colorectal cancer")
+prostate <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Prostate cancer")
 
+breast <- breast$NCI.60.ID
+colorectal <- colorectal$NCI.60.ID
+prostate <- prostate$NCI.60.ID
+drugsubset <- c(breast, colorectal, prostate)
+drugsubset <- na.omit(drugsubset)
 
-if(subset)
+x <- length(drugsubset) + 1
+
+for(d in 1:length(drugsubset))
 {
-  drugsubset <- intersect(NCI60@curation$drug$unique.drugid, colnames(combined1))
-  oo <- c()
-  for(ds in drugsubset)
+  if(grepl("," , drugsubset[d]))
   {
-    if(length(NCI60@curation$drug$NCI60.drugid[grep(ds, NCI60@curation$drug$unique.drugid, fixed = TRUE)]) > 1)
-    {
-      message(NCI60@curation$drug$NCI60.drugid[grep(ds, NCI60@curation$drug$unique.drugid, fixed = TRUE)])
-    }
-    oo <- c(oo, NCI60@curation$drug$NCI60.drugid[grep(ds, NCI60@curation$drug$unique.drugid, fixed = TRUE)])
+    s <- strsplit(drugsubset[d], ",")
+    drugsubset[d] <- s[[1]][1]
+    drugsubset <- c(drugsubset, gsub("^\\s+|\\s+$", "", s[[1]][2]))
   }
-  drugsubset <- oo
-}else
-{
-  drugsubset <- c(rownames(NCI60@curation$drug))
-  drugsubset <- unique(drugsubset)
 }
 
+drugsubset <- unique(drugsubset)
+drugsubset <- paste("drugid", drugsubset, sep = "_")
 
 
 mw <- list()
@@ -72,7 +73,7 @@ for(d in dataSets)
         if(d@sensitivity$n[x, dr] >= 1)
         {
           dataTable[c2, "cell_line"] <- x
-          dataTable[c2, dr] <- median(d@sensitivity$profiles[rownames(d@sensitivity$info)[intersect(which(x == d@sensitivity$info$cellid), which(dr == d@sensitivity$info$drugid))], "gi50_published"])
+          dataTable[c2, dr] <- median(d@sensitivity$profiles[rownames(d@sensitivity$info)[intersect(which(x == d@sensitivity$info$cellid), which(dr == d@sensitivity$info$drugid))], "auc_recomputed"])
           c2 <- c2 + 1
         }
       }
@@ -130,7 +131,7 @@ for(d in dataSets)
       ndT[,3] <- log10(ndT[,3])
       ndT <- ndT[order(ndT[,3]),]
       
-      ndT[,3] <- nrow(ndT):1
+      ndT[,3] <- 1:nrow(ndT)
       
       gset <- ndT[, c(1,2)]
       gset <- loadGSC(gset)
@@ -223,11 +224,4 @@ combined1n <- dcast(combined1n, Var1 ~ Var2)
 rownames(combined1n) <- combined1n$Var1
 combined1n <- combined1n[, -1]
 
-if(subset)
-{
-  write.xlsx(t(combined1n), file = "Supplementary_file_3.xlsx", row.names = TRUE)
-}else
-{
-  write.xlsx(t(combined1n), file = "Supplementary_file_4.xlsx", row.names = TRUE)
-}
-
+write.xlsx(combined1n, file = "supp5.xlsx")

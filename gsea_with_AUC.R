@@ -20,9 +20,10 @@ path <- args[1]
 cellannotation <- read.csv(file.path(path, "cell_annotation_all.csv"), sep=",", comment.char="#")
 breastannotation <- read.csv(file.path(path, "brca_cell_lines_all.csv"), sep=",", comment.char="#")
 
-GDSC1000 <- downloadPSet("GDSC")
+GDSC1000 <- downloadPSet("GDSC1000")
 gCSI <- downloadPSet("gCSI")
 CCLE <- downloadPSet("CCLE")
+CTRPv2 <- downloadPSet("CTRPv2") 
 
 dataSets <- c(GDSC1000, gCSI, CCLE)
 drugs <- list()
@@ -31,114 +32,147 @@ mw <- list()
 counter <- 1
 ml <- list()
 
-#removes lymphoid tissue from dataset analysis due to oversensitivity to everything 
+#removes lymphoid tissue from dataset analysis due to oversensitivity 
 paper <- FALSE
+
+
+drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="N-{3-Chloro-4-[(3-fluorobenzyl)oxy]phenyl}-6-[5-({[2-(methylsulfonyl)ethyl]amino}methyl)-2-furyl]-4-quinazolinamine", rep="lapatinib", fixed=TRUE)
+drugNames(CCLE) <- gsub(drugNames(CCLE), pat = "AZD6244", rep = "selumetinib", fixed = TRUE)
 
 for(d in dataSets)
 {
+  
   gseav <- data.frame(matrix(ncol = length(rownames(d@drug)), nrow = length(na.omit(unique(d@cell$tissueid)))))
   rownames(gseav) <- na.omit(unique(d@cell$tissueid))
   colnames(gseav) <- rownames(d@drug)
   wt <- gseav
   
-  for(dr in rownames(d@drug))
+  for(dr in sort(rownames(d@drug)))
   {
-    c2 <- 1
-    message(paste(d@annotation$name, dr, sep = " "))
-    #generate ic50 values 
-    dataTable <- data.frame(matrix(ncol = 3, nrow = length(rownames(d@cell)) + length(grep("breast", d@cell$tissueid))))
-    colnames(dataTable) <- c("cell_line", "unique.tissueid", dr)
-    for(x in rownames(d@cell))
+    if(dr != "Bleomycin (50 uM)")  
     {
-      if(x %in% rownames(d@sensitivity$n) && dr %in% colnames(d@sensitivity$n))
+      c2 <- 1
+      message(paste(d@annotation$name, dr, sep = " "))
+      #generate ic50 values 
+      dataTable <- data.frame(matrix(ncol = 3, nrow = length(rownames(d@cell)) + length(grep("breast", d@cell$tissueid))))
+      colnames(dataTable) <- c("cell_line", "unique.tissueid", dr)
+      for(x in rownames(d@cell))
       {
-        if(d@sensitivity$n[x, dr] >= 1)
+        if(x %in% rownames(d@sensitivity$n) && dr %in% colnames(d@sensitivity$n))
         {
-          dataTable[c2, "cell_line"] <- x
-          dataTable[c2, dr] <- median(d@sensitivity$profiles[rownames(d@sensitivity$info)[intersect(which(x == d@sensitivity$info$cellid), which(dr == d@sensitivity$info$drugid))], "auc_recomputed"])
+          if(d@sensitivity$n[x, dr] >= 1)
+          {
+            dataTable[c2, "cell_line"] <- x
+            if(d@annotation$name == "GDSC1000" && dr == "Bleomycin")
+            {
+              dataTable[c2, dr] <- median(c(d@sensitivity$profiles[rownames(d@sensitivity$info)[intersect(which(x == d@sensitivity$info$cellid), which(dr == d@sensitivity$info$drugid))], "auc_recomputed"], 
+                                            d@sensitivity$profiles[rownames(d@sensitivity$info)[intersect(which(x == d@sensitivity$info$cellid), which("Bleomycin (50 uM)" == d@sensitivity$info$drugid))], "auc_recomputed"])
+                                          )
+              
+            }
+            else
+            {
+              dataTable[c2, dr] <- median(d@sensitivity$profiles[rownames(d@sensitivity$info)[intersect(which(x == d@sensitivity$info$cellid), which(dr == d@sensitivity$info$drugid))], "auc_recomputed"])
+            }
+            #dataTable[c2, dr] <- median(d@sensitivity$profiles[rownames(d@sensitivity$info)[intersect(which(x == d@sensitivity$info$cellid), which(dr == d@sensitivity$info$drugid))], "auc_recomputed"])
+            c2 <- c2 + 1
+          }
+        }
+      }
+      
+      dataTable[, "unique.tissueid"] <- cellannotation[match(dataTable$cell_line, cellannotation[, "unique.cellid"]), "unique.tissueid"]
+      
+      ###RESPONSE LINE PLEASE REMOVE LATER###
+      if(paper)
+      {
+        dataTable <- dataTable[grep("lymphoid", dataTable$unique.tissueid) * -1, ]
+      }
+     
+      ### RESPONSE LINE ###
+      
+      
+      ndT <- dataTable
+      ch <- c2
+      for(x in 1:(ch-1))
+      {
+        if(ndT[x, "unique.tissueid"] == "breast" && ndT[x, "unique.tissueid"] != "" && !is.na(ndT[x, "unique.tissueid"]))
+        {
+          ndT[c2, "cell_line"] <- ndT[x, "cell_line"]
+          ndT[c2, "unique.tissueid"] <- paste("breast", breastannotation[match(ndT[x, "cell_line"], breastannotation[, "unique.cellid"]), "Subtype"], sep = "_")
+          ndT[c2, dr] <- ndT[x, dr]
           c2 <- c2 + 1
         }
       }
-    }
-    
-    dataTable[, "unique.tissueid"] <- cellannotation[match(dataTable$cell_line, cellannotation[, "unique.cellid"]), "unique.tissueid"]
-    
-    ###RESPONSE LINE PLEASE REMOVE LATER###
-    if(paper)
-    {
-      dataTable <- dataTable[grep("lymphoid", dataTable$unique.tissueid) * -1, ]
-    }
-   
-    
-    ### RESPONSE LINE ###
-    
-    ndT <- dataTable
-    ch <- c2
-    for(x in 1:(ch-1))
-    {
-      if(ndT[x, "unique.tissueid"] == "breast" && ndT[x, "unique.tissueid"] != "" && !is.na(ndT[x, "unique.tissueid"]))
+      
+      ndT <- na.omit(ndT)
+      ndT <- ndT[grep("breast_NA", ndT$unique.tissueid) * -1, ]
+      
+      for(a in unique(ndT[, "unique.tissueid"]))
       {
-        ndT[c2, "cell_line"] <- ndT[x, "cell_line"]
-        ndT[c2, "unique.tissueid"] <- paste("breast", breastannotation[match(ndT[x, "cell_line"], breastannotation[, "unique.cellid"]), "Subtype"], sep = "_")
-        ndT[c2, dr] <- ndT[x, dr]
-        c2 <- c2 + 1
-      }
-    }
-    
-    ndT <- na.omit(ndT)
-    
-    for(a in unique(ndT[, "unique.tissueid"]))
-    {
-      if(a != "")
-      {
-        wt[a, dr] <- length(grep(a, ndT[, "unique.tissueid"]))
-      }
-      
-      if(length(grep(a, ndT[, "unique.tissueid"])) < 5 || a == "")
-      {
-        ndT <- ndT[ndT$unique.tissueid != a, ]
-      }
-    }
-    
-    ndT <- ndT[order(ndT$unique.tissueid), ]
-    ndTf <- ndT
-    
-    ndT <- ndTf
-    if(nrow(ndT) > 0)
-    {
-      #linear readjustment to center around 0
-      #ndT[,3] <- as.numeric(ndT[,3])
-      #ndT[, 3] <- ndT[,3] - (max(ndT[,3]) + min(ndT[,3]))/2
-      
-      #pass into piano 
-      
-      #ndT[,3] <- 1/ndT[,3]
-      ndT[,3] <- log10(ndT[,3])
-      ndT <- ndT[order(ndT[,3]),]
-      
-      ndT[,3] <- 1:nrow(ndT)
-      
-      gset <- ndT[, c(1,2)]
-      gset <- loadGSC(gset)
-      
-      ndTc <- ndT[grep("breast_", ndT$unique.tissueid) * -1, ]
-      input <- ndTc[,3]
-      names(input) <- ndTc[,1]
-      
-      output <- runGSA(input, gsc = gset, verbose = FALSE, nPerm = 10000)
-      
-      #write value to table 
-      output <- GSAsummaryTable(output)
-      
-      for(x in 1:nrow(output))
-      {
-        if(length(output[x, "p (non-dir.)"]) == 0)
+        if(a != "")
         {
-          gseav[output[x, "Name"], dr] <- NA
+          wt[a, dr] <- length(grep(a, ndT[, "unique.tissueid"]))
         }
-        else
+        
+        if(length(grep(a, ndT[, "unique.tissueid"])) < 5 || a == "")
         {
-          gseav[output[x, "Name"], dr] <- output[x, "p (non-dir.)"]
+          ndT <- ndT[ndT$unique.tissueid != a, ]
+        }
+      }
+      
+      ndT <- ndT[order(ndT$unique.tissueid), ]
+      for(p in grep("esophagus", ndT$unique.tissueid))
+      {
+        ndT[p, "unique.tissueid"] <- "oesophagus"
+      }
+      ndTf <- ndT
+      
+      ndT <- ndTf
+      if(nrow(ndT) > 0)
+      {
+        #linear readjustment to center around 0
+        #ndT[,3] <- as.numeric(ndT[,3])
+        #ndT[, 3] <- ndT[,3] - (max(ndT[,3]) + min(ndT[,3]))/2
+        
+        #pass into piano 
+        
+        #ndT[,3] <- 1/ndT[,3]
+        ndT[,3] <- log10(ndT[,3])
+        ndT <- ndT[order(ndT[,3]),]
+        
+        ndT[,3] <- 1:nrow(ndT)
+        
+        gset <- ndT[, c(1,2)]
+        gset <- loadGSC(gset)
+        
+        ndTc <- ndT[grep("breast_", ndT$unique.tissueid) * -1, ]
+        input <- ndTc[,3]
+        names(input) <- ndTc[,1]
+        
+        output <- runGSA(input, gsc = gset, verbose = FALSE, nPerm = 10000)
+        
+        #write value to table 
+        output <- GSAsummaryTable(output)
+        
+        if(dr == "AZD6244"){dr <- "selumetinib"}
+
+        
+        for(x in 1:nrow(output))
+        {
+          if(length(output[x, "p (non-dir.)"]) == 0)
+          {
+            gseav[output[x, "Name"], dr] <- NA
+          }
+          else
+          {
+            if(output[x, "p (non-dir.)"] < 1e-20)
+            {
+              gseav[output[x, "Name"], dr] <- 1e-20
+            }else
+            {
+              gseav[output[x, "Name"], dr] <- output[x, "p (non-dir.)"]
+            }
+          }
         }
       }
     }
@@ -150,21 +184,27 @@ for(d in dataSets)
   counter <- counter + 1
 }
 
+
 save(ml, file = "./amlb.RData")
 save(mw, file = "./amwb.RData")
 
 
-CTRPv2 <- downloadPSet("CTRPv2") #currently doesnt work
+
 
 #ctrp goes here
+
+#drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="N-{3-Chloro-4-[(3-fluorobenzyl)oxy]phenyl}-6-[5-({[2-(methylsulfonyl)ethyl]amino}methyl)-2-furyl]-4-quinazolinamine", rep="lapatinib", fixed=TRUE)
+
 counter <- length(dataSets) + 1
 gseav <- data.frame(matrix(ncol = length(rownames(CTRPv2@drug)), nrow = length(na.omit(unique(CTRPv2@cell$tissueid)))))
 rownames(gseav) <- na.omit(unique(CTRPv2@cell$tissueid))
 colnames(gseav) <- rownames(CTRPv2@drug)
 wt <- gseav
-for(dr in CTRPv2@drug$drugid)
+for(dr in sort(rownames(CTRPv2@drug)))
 {
-  message(paste("CTRP", dr, sep = " "))
+  
+  message(paste("CTRPv2", dr, sep = " "))
+  
   dataTable <- CTRPv2@sensitivity$info[CTRPv2@sensitivity$info$drugid == dr, ]
   dataTable[, "unique.tissueid"] <- CTRPv2@cell[match(dataTable$cellid, CTRPv2@cell$cellid), "tissueid"]
   dataTable[, "auc"] <- CTRPv2@sensitivity$profiles[rownames(dataTable), "auc_recomputed"]
@@ -237,6 +277,15 @@ for(dr in CTRPv2@drug$drugid)
     #write value to table 
     output <- GSAsummaryTable(output)
     
+    if(dr == "bleomycin A2"){dr <- "Bleomycin"}
+    drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="bleomycin A2", rep="Bleomycin", fixed=TRUE)
+    
+    if(dr == "cytarabine hydrochloride"){dr <- "Cytarabine"}
+    drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="cytarabine hydrochloride", rep="Cytarabine", fixed=TRUE)
+    
+    if(dr == "doxorubicin"){dr <- "Doxorubicin"}
+    drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="doxorubicin", rep="Doxorubicin", fixed=TRUE)
+    
     for(x in 1:nrow(output))
     {
       if(length(output[x, "p (non-dir.)"]) == 0)
@@ -245,15 +294,21 @@ for(dr in CTRPv2@drug$drugid)
       }
       else
       {
-        gseav[output[x, "Name"], dr] <- output[x, "p (non-dir.)"]
+        if(output[x, "p (non-dir.)"] < 1e-20)
+        {
+          gseav[output[x, "Name"], dr] <- 1e-20
+        }else
+        {
+          gseav[output[x, "Name"], dr] <- output[x, "p (non-dir.)"]
+        }
       }
     }
   }
 }
 mw[[counter]] <- wt
-names(mw)[counter] <- "CTRP"
+names(mw)[counter] <- "CTRPv2"
 ml[[counter]] <- gseav
-names(ml)[counter] <- "CTRP"
+names(ml)[counter] <- "CTRPv2"
 counter <- counter + 1
 
 save(ml, file = "./amla.RData")
@@ -326,6 +381,14 @@ for(a in colnames(combined2))
   combined2[,a] <- p.adjust(combined2[,a])
 }
 
-write.xlsx(combined1, file = "suppfile3.xlsx")
-save(combined1, file = "combined1.Rdata")
+if(!paper)
+{
+  write.xlsx(combined1, file = "suppfile3.xlsx")
+  save(combined1, file = "combined1.Rdata")
+}else
+{
+  write.xlsx(combined1, file = "suppfile4.xlsx")
+  save(combined1, file = "combined1mhl.Rdata")
+}
+
 

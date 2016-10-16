@@ -1,6 +1,6 @@
 library(VennDiagram)
 
-path.input <- "~/Desktop/tissuedrug"
+path.input <- "~/Downloads"
 badchars <- "[\xb5]|[]|[ ,]|[;]|[:]|[-]|[+]|[*]|[%]|[$]|[#]|[{]|[}]|[[]|[]]|[|]|[\\^]|[/]|[\\]|[.]|[_]|[ ]"
 breast <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Breast cancer")
 colorectal <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Colorectal cancer")
@@ -21,7 +21,7 @@ for(a in 1:nrow(wordmine))
 {
   if(grepl("breast", wordmine[a,"Var2"]) && wordmine[a, "value"] >= 100)
   {
-    wrdm <- c(wrdm, as.matrix(wordmine[a, "Var1"])[1,1])
+    wrdm <- c(wrdm, wordmine[a, "Var1"])
   }
 }
 wrdm <- unique(wrdm)
@@ -39,7 +39,7 @@ for(a in 1:nrow(c2))
 vitro <- unique(vitro)
 vitro <- toupper(gsub(badchars, "", vitro))
 
-pdf("figure7.pdf", width = 20, height = 20)
+pdf("figure5a.pdf", width = 20, height = 20)
 draw.triple.venn(
   area1 = length(jaeger),
   area2 = length(vitro),
@@ -63,7 +63,7 @@ for(a in 1:nrow(wordmine))
 {
   if(grepl("prostate", wordmine[a,"Var2"]) && wordmine[a, "value"] >= 100)
   {
-    wrdm <- c(wrdm, as.matrix(wordmine[a, "Var1"])[1,1])
+    wrdm <- c(wrdm, wordmine[a, "Var1"])
   }
 }
 wrdm <- unique(wrdm)
@@ -81,7 +81,7 @@ for(a in 1:nrow(c2))
 vitro <- unique(vitro)
 vitro <- toupper(gsub(badchars, "", vitro))
 
-pdf("figure8.pdf", width = 20, height = 20)
+pdf("figure5b.pdf", width = 20, height = 20)
 draw.triple.venn(
   area1 = length(jaeger),
   area2 = length(vitro),
@@ -127,7 +127,7 @@ for(a in 1:nrow(c2))
 vitro <- unique(vitro)
 vitro <- toupper(gsub(badchars, "", vitro))
 
-pdf("figure5c.pdf", paper = "a4")
+pdf("figure5c.pdf", width = 20, height = 20)
 draw.triple.venn(
   area1 = length(jaeger),
   area2 = length(vitro),

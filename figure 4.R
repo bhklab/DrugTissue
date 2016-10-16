@@ -25,6 +25,7 @@ cm <- cm[order(cm$value), ]
 
 cmb <- cmb <- cm[which(cm$value <= 0.05),]
 cmb <- names(sort(-table(cmb$Var2))[c(1:3)])
+cmw <- cm
 maxdiff <- 0
 maxdrug <- NULL
 
@@ -33,7 +34,7 @@ cms <- names(asd[asd == 26])
 
 for(az in cms)
 {
-  for(z in c(CCLE, GDSC, CTRPv2, gCSI))
+  for(z in c(CCLE, GDSC1000, CTRPv2, gCSI))
   {
     cle <- z@sensitivity$info[which(z@sensitivity$info$drugid == as.character(az)),]
     cle <- cle[, c("cellid", "drugid")]
@@ -60,15 +61,18 @@ for(az in cms)
   }
 }
 
-cmb <- c(cmb, "lapatinib", "ABT-888", maxdrug)
+cmb <- unique(c(cmb, cms))
 
+
+cmb <- c("lapatinib")
 pd <- data.frame(matrix(nrow = 0, ncol = 4))
 colnames(pd) <- c("tissue", "drug", "auc")
+
 for(az in cmb)
 {
-  for(z in c(CCLE, GDSC, CTRPv2, gCSI))
+  for(z in c(CCLE, GDSC1000, CTRPv2, gCSI))
   {
-    cle <- z@sensitivity$info[which(z@sensitivity$info$drugid == as.character(az)),]
+    cle <- z@sensitivity$info[which(z@sensitivity$info$drugid == az),]
     cle <- cle[, c("cellid", "drugid")]
     if(nrow(cle) > 0)
     {
@@ -127,7 +131,7 @@ for(drgs in cmb)
     ggplot(test3, aes(as.factor(test3$tissue), test3$auc)) + 
     geom_boxplot(outlier.colour = NA, aes(color = test3$sig)) + 
     labs(x = "tissue type", y = "recomputed AUC") + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 15), 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10), 
           axis.text.y = element_text(size = 15), 
           axis.title=element_text(size=15),
           legend.title = element_text(size = 15),

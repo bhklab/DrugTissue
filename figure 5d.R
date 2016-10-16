@@ -1,5 +1,7 @@
+options(stringsAsFactors = FALSE)
 edges <- data.frame()
 counter <- 1
+
 
 # 1 = experimental
 # 2 = clinical
@@ -75,33 +77,32 @@ for(a in unique(prostate))
   }
 }
 
-for(x in rownames(wordmine))
+for(x in 1:nrow(wordmine))
 {
-  for(y in colnames(wordmine))
+  if(wordmine$Var2[x] != "")
   {
-    if(x != "")
+    if(wordmine$value[x] >= 100)
     {
-      if(wordmine[x,y] >= 10 && x != "" && !is.na(wordmine[x,y]))
+      y <- toupper(gsub(badchars, "", wordmine$Var1[x]))
+      if(nrow(edges[edges$V1 == y & edges$V2 == wordmine$Var2[x],]) == 0)
       {
-        y <- toupper(gsub(badchars, "", y))
-        if(nrow(edges[edges$V1 == y & edges$V2 == x,]) == 0)
+        if(y %in% colnames(combinedcopy))
         {
-          if(y %in% colnames(combinedcopy))
+          if(combinedcopy[wordmine$Var2[x],y] <= 0.05 && length(combinedcopy[wordmine$Var2[x], y]) > 0 && !is.na(combinedcopy[wordmine$Var2[x], y]))
           {
-            if(combinedcopy[x, y] <= 0.05 && length(combinedcopy[x, y]) > 0 && !is.na(combinedcopy[x, y]))
-            {
-              edges[counter, 1] <- y
-              edges[counter, 2] <- x
-              edges[counter, 3] <- 3
-              counter <- counter + 1
-            }
-            else
-            {
-              edges[counter, 1] <- y
-              edges[counter, 2] <- x
-              edges[counter, 3] <- 2
-              counter <- counter + 1
-            }
+            edges[counter, 1] <- y
+            edges[counter, 2] <- as.character(wordmine[x, "Var2"])
+            message(wordmine[x, "Var2"])
+            edges[counter, 3] <- 3
+            counter <- counter + 1
+          }
+          else
+          {
+            edges[counter, 1] <- y
+            edges[counter, 2] <-as.character(wordmine[x, "Var2"])
+            message(wordmine[x, "Var2"])
+            edges[counter, 3] <- 2
+            counter <- counter + 1
           }
         }
       }
@@ -135,7 +136,6 @@ for(a in rownames(combinedcopy))
 
 edgescopy <- edges
 
-
 edges <- edgescopy
 
 for(a in 1:nrow(edges))
@@ -144,18 +144,18 @@ for(a in 1:nrow(edges))
   {
     nsamples <- 0
     nmatch <- 0
-    for(b in c(GSK, CCLE, GDSC))
+    for(b in c(gCSI, CCLE, GDSC1000))
     {
       for(c in grep(edges[a, 1], toupper(gsub(badchars, "", b@sensitivity$info$drugid))))
       {
         ttype <- b@cell[b@sensitivity$info[c, "cellid"], "tissueid"]
         if(!is.na(ttype) && ttype == edges[a,2] && length(ttype) != 0)
         {
-          ic50 <- b@sensitivity$profiles[rownames(b@sensitivity$info)[c], "ic50_published"]
-          if(length(ic50) != 0 && !is.na(ic50))
+          auc <- b@sensitivity$profiles[rownames(b@sensitivity$info)[c], "auc_recomputed"]
+          if(length(auc) != 0 && !is.na(auc))
           {
             nsamples <- nsamples + 1
-            if(ic50 <= 1)
+            if(auc >= 0.2)
             {
               nmatch <- nmatch + 1
             }
@@ -170,7 +170,7 @@ for(a in 1:nrow(edges))
         ttype <- b@cell[b@sensitivity$info[c, "cellid"], "tissueid"]
         if(!is.na(ttype) && ttype == edges[a,2] && length(ttype) != 0)
         {
-          auc <- b@sensitivity$profiles[rownames(b@sensitivity$info)[c], "auc_published"]
+          auc <- b@sensitivity$profiles[rownames(b@sensitivity$info)[c], "auc_recomputed"]
           if(length(auc) != 0 && !is.na(auc))
           {
             nsamples <- nsamples + 1
@@ -194,4 +194,4 @@ for(a in 1:nrow(edges))
 }
 
 edges <- na.omit(edges)
-write.table(edges, file = "figure5d.csv", sep = ",")
+write.xlsx(edges, file = "figure5d.xlsx")

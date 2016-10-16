@@ -1,35 +1,14 @@
-listofdrugs <- c(rownames(GDSC@drug), rownames(gCSI@drug), rownames(CCLE@drug), rownames(CTRPv2@drug))
-finallist <- NULL
+pres <- data.frame(matrix(ncol = 5, nrow = ncol(combined1)))
+rownames(pres) <- colnames(combined1)
+colnames(pres) <- c("CTRPv2", "CCLE", "GDSC1000", "gCSI", "NCI60")
 
-for(d in unique(listofdrugs))
-{
-  if(length(which(listofdrugs == d)) >= 3)
-  {
-    finallist <- c(finallist, d)
-  }
-}
+pres[, "CTRPv2"] <- rownames(pres) %in% rownames(CTRPv2@drug)
+pres[, "CCLE"] <- rownames(pres) %in% rownames(CCLE@drug)
+pres[, "GDSC1000"] <- rownames(pres) %in% rownames(GDSC1000@drug)
+pres[, "gCSI"] <- rownames(pres) %in% rownames(gCSI@drug)
+pres[, "NCI60"] <- rownames(pres) %in% NCI60@curation$drug$unique.drugid
 
-for(d in finallist)
-{
-  out <- matrix(nrow = length(which(listofdrugs == d)) + 1, ncol = length(c("dataset", rownames(combined1))))
-  colnames(out) <- c("dataset", rownames(combined1))
-  counter <- 1
-  for(ds in ml)
-  {
-    if(d %in% colnames(ds))
-    {
-      for(a in 1:nrow(ds))
-      {
-        if(rownames(ds)[a] %in% colnames(out))
-        {
-          out[counter, rownames(ds)[a]] <- ds[a, d]
-          out[nrow(out), rownames(ds)[a]] <- combined1[rownames(ds)[a], d]
-        }
-      }
-      out[counter, "dataset"] <- names(ml)[counter]
-      counter <- counter + 1
-    }
-  }
-  out[nrow(out), "dataset"] <- "combined"
-  write.xlsx(out, file = "suppfile1.xlsx", sheetName = d, append = TRUE)
-}
+pres[pres == TRUE] <- 1
+pres[pres == FALSE] <- ""
+
+write.xlsx(pres, file = "Supplementary_file_1.xlsx", rowNames = TRUE)

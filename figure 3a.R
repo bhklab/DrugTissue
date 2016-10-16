@@ -1,12 +1,13 @@
 boxp <- data.frame(matrix(nrow = nrow(combined1), ncol = 2))
 colnames(boxp) <- c("percentage", "size")
 rownames(boxp) <- rownames(combined1)
-linenums$`tissue type` <- gsub(" ", "_", linenums$`tissue type`)
+
+linenumscp <- melt(as.matrix(linenums))
 
 for(c in rownames(combined1))
 {
   boxp[c, "percentage"] <- length(which(combined1[c,] <= 0.05)) / length(na.omit(t(combined1[c,])))
-  boxp[c, "size"] <- sum(linenums[grep(c, linenums$`tissue type`, fixed = TRUE), "value"])
+  boxp[c, "size"] <- sum(linenumscp[grep(c, linenumscp$Var1, fixed = TRUE), "value"])
 }
 
 boxp[, "percentage"] <- as.numeric(boxp[, "percentage"] * 100)

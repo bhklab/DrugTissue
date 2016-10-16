@@ -18,7 +18,7 @@ getDrugTests <- function(drug, phase3 = FALSE)
   }
   url <- paste(url, "&studyxml=true", sep="")
   
-  cellannotation <- read.csv(file.path("~/Desktop/tissuedrug/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#") 
+  cellannotation <- read.csv(file.path("~/Documents", "cell_annotation_all_new.csv"), sep=",", comment.char="#") 
   tissues <- cellannotation[, grep("tissue", colnames(cellannotation))]
   to <- vector()
   
@@ -34,10 +34,10 @@ getDrugTests <- function(drug, phase3 = FALSE)
   to <- unique(to)
   to <- gsub(" ", "", to)
   to <- gsub("_", " ", to)
-  
+  to <- na.omit(to)
   for(x in 1:length(to))
   {
-    if(nchar(to[x]) < 4)
+    if(nchar(to[x]) < 4 || is.na(to[x]))
     {
       to[x] <- NA
     }
@@ -49,7 +49,7 @@ getDrugTests <- function(drug, phase3 = FALSE)
       }
     }
   }
-  to <- na.omit(to)
+  
   if(!file.exists("drugdata"))
   {
     dir.create("drugdata", showWarnings=FALSE, recursive=TRUE) 
