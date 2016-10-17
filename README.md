@@ -78,8 +78,18 @@ load the XML clinicaltrials.gov reader from `drugResultGetter.R` , and run `word
 
 all figures are generated through their respective R file and should run independently with varying pdf generation in working directory set using `setWD()`
 
-`figure 5d.R` generates the data for figure 5d, which should then be exported into cytoscape for network visualization
+`figure 7.R` generates the data for figure 7, which should then be exported into cytoscape for network visualization
 
 Figure 1 was manually created using Microsoft Word
 
 supplementary file 3 is generated at the end of `GSEA_with_AUC.R`
+
+supplementary figure 2 generated at the end of `supplementary file 2.R`
+
+
+Docker
+-------------------------------
+
+soon<sup>TM<sup>
+
+
