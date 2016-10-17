@@ -10,7 +10,7 @@ for(x in rownames(combined1))
 
 order <- rownames(f3a)[order(-f3a$value)]
 
-pdf("figure3a.pdf")
+pdf("figure4a.pdf")
 ggplot(f3a, aes(x = rownames(f3a), y = f3a$value)) + 
   geom_bar(stat = "identity", position="dodge") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10), axis.text.y = element_text(size = 10), axis.title=element_text(size=10)) +
@@ -41,7 +41,7 @@ bot3 <- rownames(f3b)[grep(0, f3b$value)]
 orv <- orv[1:nrow(combined1)]
 f3b <- f3b[orv, ]
 
-pdf("figure3b.pdf")
+pdf("figure4b.pdf")
 ggplot(f3b, aes(x = rownames(f3b), y = f3b$value)) + 
   geom_bar(stat = "identity", position="dodge") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10), axis.text.y = element_text(size = 10), axis.title=element_text(size=10)) +

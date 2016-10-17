@@ -31,5 +31,6 @@ for(d in finallist)
     }
   }
   out[nrow(out), "dataset"] <- "combined"
-  write.xlsx(out, file = "Supplementary_file_2.xlsx", sheetName = d, append = TRUE)
+  out[is.na(out)] <- ""
+  write.xlsx(t(out), file = "Supplementary_file_2.xlsx", sheetName = d, append = TRUE)
 }
