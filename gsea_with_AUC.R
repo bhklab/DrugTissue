@@ -33,7 +33,7 @@ counter <- 1
 ml <- list()
 
 #removes lymphoid tissue from dataset analysis due to oversensitivity 
-paper <- FALSE
+paper <- TRUE
 
 
 drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="N-{3-Chloro-4-[(3-fluorobenzyl)oxy]phenyl}-6-[5-({[2-(methylsulfonyl)ethyl]amino}methyl)-2-furyl]-4-quinazolinamine", rep="lapatinib", fixed=TRUE)
@@ -156,7 +156,6 @@ for(d in dataSets)
         
         if(dr == "AZD6244"){dr <- "selumetinib"}
 
-        
         for(x in 1:nrow(output))
         {
           if(length(output[x, "p (non-dir.)"]) == 0)
@@ -200,9 +199,13 @@ gseav <- data.frame(matrix(ncol = length(rownames(CTRPv2@drug)), nrow = length(n
 rownames(gseav) <- na.omit(unique(CTRPv2@cell$tissueid))
 colnames(gseav) <- rownames(CTRPv2@drug)
 wt <- gseav
+
 for(dr in sort(rownames(CTRPv2@drug)))
 {
-  
+  if(dr == "bleomycin A2"){dr <- "Bleomycin"}
+  if(dr == "cytarabine hydrochloride"){dr <- "Cytarabine"}
+  #drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="cytarabine hydrochloride", rep="Cytarabine", fixed=TRUE)
+  if(dr == "doxorubicin"){dr <- "Doxorubicin"}
   message(paste("CTRPv2", dr, sep = " "))
   
   dataTable <- CTRPv2@sensitivity$info[CTRPv2@sensitivity$info$drugid == dr, ]
@@ -278,13 +281,13 @@ for(dr in sort(rownames(CTRPv2@drug)))
     output <- GSAsummaryTable(output)
     
     if(dr == "bleomycin A2"){dr <- "Bleomycin"}
-    drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="bleomycin A2", rep="Bleomycin", fixed=TRUE)
+    #drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="bleomycin A2", rep="Bleomycin", fixed=TRUE)
     
     if(dr == "cytarabine hydrochloride"){dr <- "Cytarabine"}
-    drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="cytarabine hydrochloride", rep="Cytarabine", fixed=TRUE)
+    #drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="cytarabine hydrochloride", rep="Cytarabine", fixed=TRUE)
     
     if(dr == "doxorubicin"){dr <- "Doxorubicin"}
-    drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="doxorubicin", rep="Doxorubicin", fixed=TRUE)
+    #drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="doxorubicin", rep="Doxorubicin", fixed=TRUE)
     
     for(x in 1:nrow(output))
     {
@@ -383,11 +386,11 @@ for(a in colnames(combined2))
 
 if(!paper)
 {
-  write.xlsx(combined1, file = "suppfile3.xlsx")
+  write.xlsx(combined1, file = "Supplementary_file_3.xlsx")
   save(combined1, file = "combined1.Rdata")
 }else
 {
-  write.xlsx(combined1, file = "suppfile4.xlsx")
+  write.xlsx(combined1, file = "Supplementary_file_not_made.xlsx")
   save(combined1, file = "combined1mhl.Rdata")
 }
 

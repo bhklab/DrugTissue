@@ -49,7 +49,7 @@ ggplot(graph, aes(dataset, value)) +
   geom_bar(aes(fill = reorder(graph$category, rev(graph$value))), stat = "identity", width = 0.8) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 20), axis.text.y = element_text(size = 20), axis.title=element_text(size=30)) +
   guides(fill=guide_legend(title="", keywidth=0.1, keyheight=0.5, default.unit="inch")) +
-  scale_x_discrete(limits = c("gCSI", "CCLE", "CTRPv2", "GDSC1000", "metaanalysis")) + 
+  scale_x_discrete(limits = c("gCSI", "CCLE", "GDSC1000", "CTRPv2", "metaanalysis")) + 
   #scale_y_log10() + 
   labs(x = NULL, y = "number of drug tissue interactions") +
   theme(legend.text=element_text(size=30))

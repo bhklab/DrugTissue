@@ -20,11 +20,8 @@ breastannotation <- read.csv(file.path("~/Documents", "brca_cell_lines_all.csv")
 dataSets <- c(NCI60)
 drugs <- list()
 
-#setting this to TRUE generates supplementary file 3, FALSE for 4
+#setting this to TRUE generates supplementary file 9, FALSE for 4
 subset <- TRUE
-
-#supplementary file 3 is used to generate supplementary figure 2
-
 
 if(subset)
 {
@@ -225,7 +222,7 @@ combined1n <- combined1n[, -1]
 
 if(subset)
 {
-  write.xlsx(t(combined1n), file = "Supplementary_file_3.xlsx", row.names = TRUE)
+  write.xlsx(t(combined1n), file = "Supplementary_file_9.xlsx", row.names = TRUE)
 }else
 {
   write.xlsx(t(combined1n), file = "Supplementary_file_4.xlsx", row.names = TRUE)

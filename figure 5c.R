@@ -39,7 +39,7 @@ for(a in 1:nrow(c2))
 vitro <- unique(vitro)
 vitro <- toupper(gsub(badchars, "", vitro))
 
-pdf("figure5a.pdf", width = 20, height = 20)
+pdf("breast.pdf", width = 20, height = 20)
 draw.triple.venn(
   area1 = length(jaeger),
   area2 = length(vitro),
@@ -81,7 +81,7 @@ for(a in 1:nrow(c2))
 vitro <- unique(vitro)
 vitro <- toupper(gsub(badchars, "", vitro))
 
-pdf("figure5b.pdf", width = 20, height = 20)
+pdf("prostate.pdf", width = 20, height = 20)
 draw.triple.venn(
   area1 = length(jaeger),
   area2 = length(vitro),
@@ -127,7 +127,7 @@ for(a in 1:nrow(c2))
 vitro <- unique(vitro)
 vitro <- toupper(gsub(badchars, "", vitro))
 
-pdf("figure5c.pdf", width = 20, height = 20)
+pdf("colorectal.pdf", width = 20, height = 20)
 draw.triple.venn(
   area1 = length(jaeger),
   area2 = length(vitro),

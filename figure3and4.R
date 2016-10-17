@@ -36,7 +36,7 @@ for(x in colnames(combined1))
 
 orv <- order(-f3b$value)
 top3 <- rownames(f3b)[orv[1:4]]
-bot3 <- c("MS-275", "betulinic acid")
+bot3 <- rownames(f3b)[grep(0, f3b$value)]
 
 orv <- orv[1:nrow(combined1)]
 f3b <- f3b[orv, ]

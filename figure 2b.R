@@ -5,25 +5,34 @@ CCLE <- downloadPSet("CCLE")
 CTRPv2 <- downloadPSet("CTRPv2") 
 
 drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="N-{3-Chloro-4-[(3-fluorobenzyl)oxy]phenyl}-6-[5-({[2-(methylsulfonyl)ethyl]amino}methyl)-2-furyl]-4-quinazolinamine", rep="lapatinib", fixed=TRUE)
+drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="bleomycin A2", rep="Bleomycin", fixed=TRUE)
+drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="cytarabine hydrochloride", rep="Cytarabine", fixed=TRUE)
+drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="doxorubicin", rep="Doxorubicin", fixed=TRUE)
+drugNames(CCLE) <- gsub(drugNames(CCLE), pat = "AZD6244", rep = "selumetinib", fixed = TRUE)
+
+ccled <- colnames(ml$CCLE)
+gdscd <- colnames(ml$GDSC1000)
+ctrpd <- colnames(ml$CTRPv2)
+gcsid <- colnames(ml$gCSI)
 
 pdf("figure2drugs.pdf", width = 100, height = 10, paper = "USr")
 #figure 2 drugs
 draw.quad.venn(
-  area1 = nrow(CCLE@drug),
-  area2 = nrow(GDSC1000@drug),
-  area3 = nrow(CTRPv2@drug),
-  area4 = nrow(gCSI@drug),
-  n12 = length(intersect(rownames(CCLE@drug), rownames(GDSC1000@drug))),
-  n13 = length(intersect(rownames(CCLE@drug), rownames(CTRPv2@drug))),
-  n14 = length(intersect(rownames(CCLE@drug), rownames(gCSI@drug))),
-  n23 = length(intersect(rownames(GDSC1000@drug), rownames(CTRPv2@drug))),
-  n24 = length(intersect(rownames(GDSC1000@drug), rownames(gCSI@drug))),
-  n34 = length(intersect(rownames(CTRPv2@drug), rownames(gCSI@drug))),
-  n123 = length(intersect(intersect(rownames(CCLE@drug), rownames(GDSC1000@drug)), rownames(CTRPv2@drug))),
-  n124 = length(intersect(intersect(rownames(CCLE@drug), rownames(GDSC1000@drug)), rownames(gCSI@drug))),
-  n134 = length(intersect(intersect(rownames(CCLE@drug), rownames(CTRPv2@drug)), rownames(gCSI@drug))),
-  n234 = length(intersect(intersect(rownames(GDSC1000@drug), rownames(CTRPv2@drug)), rownames(gCSI@drug))), 
-  n1234 = length(intersect(intersect(rownames(CCLE@drug), rownames(GDSC1000@drug)), intersect(rownames(CTRPv2@drug), rownames(gCSI@drug)))), 
+  area1 = length(ccled),
+  area2 = length(gdscd),
+  area3 = length(ctrpd),
+  area4 = length(gcsid),
+  n12 = length(intersect(ccled, gdscd)),
+  n13 = length(intersect(ccled, ctrpd)),
+  n14 = length(intersect(ccled, gcsid)),
+  n23 = length(intersect(gdscd, ctrpd)),
+  n24 = length(intersect(gdscd, gcsid)),
+  n34 = length(intersect(ctrpd, gcsid)),
+  n123 = length(intersect(intersect(ccled, gdscd), ctrpd)),
+  n124 = length(intersect(intersect(ccled, gdscd), gcsid)),
+  n134 = length(intersect(intersect(ccled, ctrpd), gcsid)),
+  n234 = length(intersect(intersect(gdscd, ctrpd), gcsid)), 
+  n1234 = length(intersect(intersect(ccled, gdscd), intersect(ctrpd, gcsid))), 
   category = c("CCLE", "GDSC1000", "CTRPv2", "gCSI"),
   cat.cex = 2,
   cex = 2,
