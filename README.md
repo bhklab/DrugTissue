@@ -64,7 +64,7 @@ loaded via a namespace (and not attached):
 
 All these packages are available on [CRAN](http://cran.r-project.org) or [Bioconductor](http://www.bioconductor.org)
 
-all nessesary packages have `library(<package>)` calls within the R scripts themselves, or the script assumes a previous script has been run and thus should have loaded nessesary packages. 
+All necessary packages have `library(<package>)` calls within the R scripts themselves, or the script assumes a previous script has been run and thus should have loaded nessesary packages. 
 
 Running R Scripts in Repository and figure generation
 -------------------------------
