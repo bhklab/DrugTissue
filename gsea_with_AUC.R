@@ -12,7 +12,7 @@ library(survcomp)
 
 options(digits = 9)
 
-path.data=file.path("data", "analysis")
+path.data=file.path("DrugTissue")
 
 args <- commandArgs(trailingOnly = TRUE)
 path <- args[1]
