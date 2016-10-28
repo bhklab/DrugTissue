@@ -19,7 +19,7 @@ path.data=file.path("DrugTissue")
 args <- commandArgs(trailingOnly = TRUE)
 path <- args[1]
 
-cellannotation <- read.csv(file.path(path, "cell_annotation_all.csv"), sep=",", comment.char="#")
+cellannotation <- read.csv(file.path(path, "cell_annotation_all_new.csv"), sep=",", comment.char="#")
 breastannotation <- read.csv(file.path(path, "brca_cell_lines_all.csv"), sep=",", comment.char="#")
 
 GDSC1000 <- downloadPSet("GDSC1000")
