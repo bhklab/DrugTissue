@@ -1,3 +1,5 @@
+.libPaths("/")
+
 library(ggplot2)
 library(mgcv)
 library(reshape2)
