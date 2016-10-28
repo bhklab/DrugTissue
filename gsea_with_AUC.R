@@ -8,7 +8,7 @@ library(grid)
 library(gplots)
 library(RColorBrewer)
 options(stringsAsFactors=FALSE)
-library(xlsx)
+library(openxlsx)
 library(piano)
 library(survcomp)
 
