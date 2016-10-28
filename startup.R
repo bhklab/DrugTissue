@@ -30,5 +30,5 @@ if(!require(piano))
 if(!require(PharmacoGx))
 {
   biocLite("PharmacoGx")
-  library(piano)
+  library(PharmacoGx)
 }
