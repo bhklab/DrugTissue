@@ -11,6 +11,7 @@ options(stringsAsFactors=FALSE)
 library(openxlsx)
 library(piano)
 library(survcomp)
+library(PharmacoGx)
 
 options(digits = 9)
 
