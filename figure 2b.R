@@ -1,7 +1,6 @@
-library(VennDiagram)
-
 .libPaths("/rlibs/")
 library(PharmacoGx)
+library(VennDiagram)
 
 GDSC1000 <- downloadPSet("GDSC1000")
 gCSI <- downloadPSet("gCSI")
