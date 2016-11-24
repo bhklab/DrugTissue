@@ -78,7 +78,7 @@ load the XML clinicaltrials.gov reader from `drugResultGetter.R` , and run `word
 
 all figures are generated through their respective R file and should run independently with varying pdf generation in working directory set using `setWD()`
 
-`figure 7.R` generates the data for figure 7, which should then be exported into cytoscape for network visualization
+`figure7p1.R` and `figure7p2.R` generates the data for figure 7, which was then exported to circos for visualization
 
 Figure 1 was manually created using Microsoft Word
 
