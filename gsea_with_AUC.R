@@ -25,7 +25,7 @@ gCSI <- downloadPSet("gCSI")
 CCLE <- downloadPSet("CCLE")
 CTRPv2 <- downloadPSet("CTRPv2") 
 
-dataSets <- c(gCSI, CCLE)
+dataSets <- c(gCSI, CCLE, GDSC1000)
 drugs <- list()
 
 mw <- list()

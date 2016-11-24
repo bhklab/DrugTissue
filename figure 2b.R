@@ -1,4 +1,8 @@
 library(VennDiagram)
+
+.libPaths("/rlibs/")
+library(PharmacoGx)
+
 GDSC1000 <- downloadPSet("GDSC1000")
 gCSI <- downloadPSet("gCSI")
 CCLE <- downloadPSet("CCLE")
@@ -15,7 +19,7 @@ gdscd <- colnames(ml$GDSC1000)
 ctrpd <- colnames(ml$CTRPv2)
 gcsid <- colnames(ml$gCSI)
 
-pdf("figure2drugs.pdf", width = 100, height = 10, paper = "USr")
+pdf("./output/figure2drugs.pdf", width = 100, height = 10, paper = "USr")
 #figure 2 drugs
 draw.quad.venn(
   area1 = length(ccled),
@@ -47,7 +51,7 @@ gdsc1000cell <- GDSC1000@cell
 ctrpv2cell <- CTRPv2@cell
 gcsicell <- gCSI@cell
 
-pdf("figure2cells.pdf", width = 100, height = 10, paper = "USr")
+pdf("./output/figure2cells.pdf", width = 100, height = 10, paper = "USr")
 #figure 2 cells
 draw.quad.venn(
   area1 = nrow(cclecell),
@@ -81,8 +85,7 @@ ctrpv2cell <- ctrpv2cell[ctrpv2cell$tissueid != "", ]
 gcsicell <- gcsicell[gcsicell$tissueid != "", ]
 
 
-
-pdf("figure2tissue.pdf", width = 100, height = 10, paper = "USr")
+pdf("./output/figure2tissue.pdf", width = 100, height = 10, paper = "USr")
 #figure 2 tissue types
 draw.quad.venn(
   area1 = length(unique(na.omit(cclecell$tissueid))),
