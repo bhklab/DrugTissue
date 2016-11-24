@@ -1,6 +1,6 @@
 source("https://bioconductor.org/biocLite.R")
 .libPaths("/rlibs/")
-list.of.packages <- c("ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra", "gplots","pheatmap","RColorBrewer", "openxlsx")
+list.of.packages <- c("ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra", "gplots","pheatmap","RColorBrewer", "openxlsx", "VennDiagram")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos='http://cran.utstat.utoronto.ca/')
 
@@ -13,7 +13,7 @@ library(gplots)
 library(RColorBrewer)
 library(openxlsx)
 library(pheatmap)
-
+library(VennDiagram)
 
 if(!require(survcomp))
 {
