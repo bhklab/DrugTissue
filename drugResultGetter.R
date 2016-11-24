@@ -15,7 +15,7 @@ getDrugTests <- function(drug, phase3 = FALSE)
   }
   url <- paste(url, "&studyxml=true", sep="")
   
-  cellannotation <- read.csv(file.path("~/Documents", "cell_annotation_all_new.csv"), sep=",", comment.char="#") 
+  cellannotation <- read.csv(file.path(".", "cell_annotation_all_new.csv"), sep=",", comment.char="#") 
   tissues <- cellannotation[, grep("tissue", colnames(cellannotation))]
   to <- vector()
   

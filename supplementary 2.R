@@ -1,3 +1,5 @@
+.libPaths("/rlibs/")
+
 library(ggplot2)
 library(mgcv)
 library(reshape2)
@@ -8,6 +10,7 @@ options(stringsAsFactors=FALSE)
 library(xlsx)
 library(piano)
 library(survcomp)
+library(pheatmap)
 
 options(digits = 9)
 
@@ -15,12 +18,21 @@ path.data=file.path("data", "analysis")
 
 badchars <- "[\xb5]|[]|[ ,]|[;]|[:]|[-]|[+]|[*]|[%]|[$]|[#]|[{]|[}]|[[]|[]]|[|]|[\\^]|[/]|[\\]|[.]|[_]|[ ]"
 
+NCI60 <- downloadPSet("NCI60")
+
+if(!file.exists("./temp/combined1.RData"))
+{
+  source("./gsea_with_AUC.R")
+} else {
+  load("./temp/combined1.RData")
+}
+
 cellannotation <- read.csv(file.path("~/Documents/PharmacoGx-private/inst/extdata", "cell_annotation_all.csv"), sep=",", comment.char="#")
 breastannotation <- read.csv(file.path("~/Documents", "brca_cell_lines_all.csv"), sep=",", comment.char="#")
 dataSets <- c(NCI60)
 drugs <- list()
 
-#setting this to TRUE generates supplementary file 9, FALSE for 4
+#setting this to TRUE generates supplementary figure 2, FALSE for supplementary file 4
 subset <- TRUE
 
 if(subset)
@@ -222,9 +234,7 @@ combined1n <- combined1n[, -1]
 
 if(subset)
 {
-  #write.xlsx(t(combined1n), file = "Supplementary_file_9.xlsx", row.names = TRUE)
-  
-  pdf("Supplementary_figure_2_NCI60.pdf", width=7,height=15, onefile = F)
+  pdf("./output/Supplementary_figure_2_NCI60.pdf", width=7,height=15, onefile = F)
   pn <- pheatmap(t(combined1n), fontsize=16, fontsize_row = 7, fontsize_col = 16, breaks = seq(0,1,by=0.001), color = colorRampPalette(c("green", rep("orange", 9), rep("blue", 40), rep("grey", 950)))(length(seq(0,1,by=0.001))-1), cellheight = 8, show_rownames = F, cluster_rows = F, treeheight_col = 0)
   dev.off()
   
@@ -236,12 +246,12 @@ if(subset)
   tin <- pn$tree_col$labels
   tin <- tin[pn$tree_col$order]
   
-  pdf("Supplementary_figure_2_metaanalysis.pdf", width=7,height=15, onefile = F)
+  pdf("./output/Supplementary_figure_2_metaanalysis.pdf", width=7,height=15, onefile = F)
   pheatmap(t(combined1[tin,din]), fontsize=16, fontsize_row = 7, fontsize_col = 16, breaks = seq(0,1,by=0.001), color = colorRampPalette(c("green", rep("orange", 9), rep("blue", 40), rep("grey", 950)))(length(seq(0,1,by=0.001))-1), cellheight = 8, show_rownames = F, cluster_cols = FALSE, cluster_rows = F)
   dev.off()
   
 }else
 {
-  write.xlsx(t(combined1n), file = "Supplementary_file_4.xlsx", row.names = TRUE)
+  write.xlsx(t(combined1n), file = "./output/Supplementary_file_4.xlsx", row.names = TRUE)
 }
 

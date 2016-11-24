@@ -1,3 +1,20 @@
+.libPaths("/rlibs/")
+library(PharmacoGx)
+
+if(!file.exists("./temp/combined1.RData"))
+{
+  source("./gsea_with_AUC.R")
+} else {
+  load("./temp/combined1.RData")
+}
+
+CCLE <- downloadPSet("CCLE_2013")
+GDSC100 <- downloadPSet("GDSC1000")
+gCSI <- downloadPSet("gCSI")
+CTRPv2 <- downloadPSet("CTRPv2")
+
+
+
 listofdrugs <- c(rownames(GDSC1000@drug), rownames(gCSI@drug), rownames(CCLE@drug), rownames(CTRPv2@drug))
 finallist <- NULL
 
@@ -32,5 +49,5 @@ for(d in finallist)
   }
   out[nrow(out), "dataset"] <- "combined"
   out[is.na(out)] <- ""
-  write.xlsx(t(out), file = "Supplementary_file_2.xlsx", sheetName = d, append = TRUE)
+  write.xlsx(t(out), file = "./output/Supplementary_file_2.xlsx", sheetName = d, append = TRUE)
 }

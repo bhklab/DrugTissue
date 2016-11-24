@@ -1,3 +1,14 @@
+.libPaths("/rlibs/")
+library(PharmacoGx)
+
+if(!file.exists("./temp/combined1.RData"))
+{
+  source("gsea_with_AUC.R")
+} else 
+{
+  load("./temp/combined1.RData")
+}
+
 graph <- data.frame(matrix(nrow = 0,ncol = 3))
 colnames(graph) <- c("dataset", "category", "value")
 
@@ -44,7 +55,7 @@ for(ds in 1:length(ml))
 graph$dataset <- gsub("gSCI", "gCSI", graph$dataset)
 graph <- rbind(graph, data.frame(dataset="metaanalysis", category="metaanalysis", value=length(combined1[!is.na(combined1) & combined1 < 0.05])))
 
-pdf("Supplementary_Figure_3.pdf", width = 10, height = 10)
+pdf("./output/Figure_5.pdf", width = 10, height = 10)
 ggplot(graph, aes(dataset, value)) + 
   geom_bar(aes(fill = reorder(graph$category, rev(graph$value))), stat = "identity", width = 0.8) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 20), axis.text.y = element_text(size = 20), axis.title=element_text(size=30)) +

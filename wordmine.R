@@ -1,3 +1,11 @@
+.libPaths("/rlibs/")
+library(PharmacoGx)
+
+CCLE <- downloadPSet("CCLE_2013")
+GDSC100 <- downloadPSet("GDSC1000")
+gCSI <- downloadPSet("gCSI")
+CTRPv2 <- downloadPSet("CTRPv2")
+
 wordmine <- data.frame()
 source("./drugResultGetter.R")
 inputdruglist <- unique(c(rownames(gCSI@drug), rownames(CCLE@drug), rownames(GDSC1000@drug), rownames(CTRPv2@drug), breast, colorectal, prostate))

@@ -184,8 +184,8 @@ for(d in dataSets)
 }
 
 
-save(ml, file = "./amlb.RData")
-save(mw, file = "./amwb.RData")
+save(ml, file = "./temp/amlb.RData")
+save(mw, file = "./temp/amwb.RData")
 
 
 
@@ -311,8 +311,8 @@ ml[[counter]] <- gseav
 names(ml)[counter] <- "CTRPv2"
 counter <- counter + 1
 
-save(ml, file = "./amla.RData")
-save(mw, file = "./amwa.RData")
+save(ml, file = "./temp/amla.RData")
+save(mw, file = "./temp/amwa.RData")
 
 druglist <- list()
 celltypelist <- list()
@@ -384,11 +384,11 @@ for(a in colnames(combined2))
 if(!paper)
 {
   write.xlsx(combined1, file = "Supplementary_file_3.xlsx")
-  save(combined1, file = "combined1.Rdata")
+  save(combined1, file = "./temp/combined1.RData")
 }else
 {
   write.xlsx(combined1, file = "Supplementary_file_not_made.xlsx")
-  save(combined1, file = "combined1mhl.Rdata")
+  save(combined1, file = "./temp/combined1mhl.RData")
 }
 
 

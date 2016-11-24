@@ -1,5 +1,21 @@
 options(stringsAsFactors = FALSE)
 
+.libPaths("/rlibs/")
+library(PharmacoGx)
+
+if(!file.exists("./temp/combined1.RData"))
+{
+  source("./gsea_with_AUC.R")
+} else {
+  load("./temp/combined1.RData")
+}
+
+CCLE <- downloadPSet("CCLE_2013")
+GDSC100 <- downloadPSet("GDSC1000")
+gCSI <- downloadPSet("gCSI")
+CTRPv2 <- downloadPSet("CTRPv2")
+
+
 f3a <- data.frame(matrix(ncol = 1, nrow = nrow(combined1)))
 rownames(f3a) <- rownames(combined1)
 colnames(f3a) <- "value"

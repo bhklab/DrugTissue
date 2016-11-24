@@ -13,6 +13,14 @@ drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="cytarabine hydrochloride", rep
 drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="doxorubicin", rep="Doxorubicin", fixed=TRUE)
 drugNames(CCLE) <- gsub(drugNames(CCLE), pat = "AZD6244", rep = "selumetinib", fixed = TRUE)
 
+if(!file.exists("./temp/amla.RData"))
+{
+  source("./gsea_with_AUC.R")
+} else 
+{
+  load("./temp/amla.RData")
+}
+
 ccled <- colnames(ml$CCLE)
 gdscd <- colnames(ml$GDSC1000)
 ctrpd <- colnames(ml$CTRPv2)

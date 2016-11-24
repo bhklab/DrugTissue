@@ -1,3 +1,24 @@
+.libPaths("/rlibs/")
+
+
+if(!file.exists("./temp/combined1.RData"))
+{
+  source("gsea_with_AUC.R")
+} else 
+{
+  load("./temp/combined1.RData")
+}
+
+if(!file.exists("./temp/wordmine.RData"))
+{
+  source("wordmine.R")
+} else 
+{
+  load("./temp/wordmine.RData")
+}
+
+
+
 options(stringsAsFactors = FALSE)
 edges <- data.frame()
 counter <- 1
@@ -194,4 +215,4 @@ for(a in 1:nrow(edges))
 }
 
 edges <- na.omit(edges)
-write.xlsx(edges, file = "figure5d.xlsx")
+write.xlsx(edges, file = "./temp/figure7.xlsx")
