@@ -1,3 +1,18 @@
+.libPaths("/rlibs/")
+library(PharmacoGx)
+
+if(!file.exists("./temp/combined1.RData"))
+{
+  source("./gsea_with_AUC.R")
+} else {
+  load("./temp/combined1.RData")
+}
+
+CCLE <- downloadPSet("CCLE_2013")
+GDSC100 <- downloadPSet("GDSC1000")
+gCSI <- downloadPSet("gCSI")
+CTRPv2 <- downloadPSet("CTRPv2")
+
 linenums <- as.data.frame(matrix(ncol = 4, nrow = nrow(combined1)))
 rownames(linenums) <- rownames(combined1)
 colnames(linenums) <- c("CCLE", "GDSC1000", "CTRPv2", "gCSI")
@@ -75,7 +90,7 @@ linenums$`tissue type` <- gsub("_", " ", linenums$`tissue type`)
 
 linenums$`tissue type` <- as.factor(linenums$`tissue type`)
 
-pdf("figure2a.pdf")
+pdf("./output/figure2a.pdf")
 ggplot(linenums, aes(x = linenums$`tissue type`, y = linenums$value, fill=linenums$dataset)) + 
   geom_bar(stat = "identity", position="dodge") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10), axis.text.y = element_text(size = 10), axis.title=element_text(size=10)) +

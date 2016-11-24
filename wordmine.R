@@ -1,5 +1,5 @@
 wordmine <- data.frame()
-
+source("./drugResultGetter.R")
 inputdruglist <- unique(c(rownames(gCSI@drug), rownames(CCLE@drug), rownames(GDSC1000@drug), rownames(CTRPv2@drug), breast, colorectal, prostate))
 inputdruglist <- unique(toupper(gsub(badchars, "", inputdruglist)))
 
@@ -46,4 +46,4 @@ rownames(wordmine)[nrow(wordmine) - 1] <- "large_intestine"
 
 wordmine <- melt(as.matrix(t(wordmine)))
 
-save(wordmine, file = "./wordmine.RData")
+save(wordmine, file = "./temp/wordmine.RData")
