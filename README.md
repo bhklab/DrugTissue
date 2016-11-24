@@ -90,6 +90,12 @@ supplementary figure 2 generated at the end of `supplementary file 2.R`
 Docker
 -------------------------------
 
-soon<sup>TM<sup>
+Currently publicly hosted at `https://hub.docker.com/r/gosuzombie/tissuedrug/`
+
+the Docker file is also within the repo. Building the Docker image can be done using the command `docker build .` within the repository directory. 
+
+Afterwards, the image id can be found using `docker images`
+
+Finally, an interactive shell can be instantiated by running `docker run -it <docker image id>`
 
 
