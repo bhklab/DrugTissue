@@ -1,5 +1,6 @@
 getDrugTests <- function(drug, phase3 = FALSE)
 {
+  .libPaths("/rlibs/")
   if(!require(XML))
   {
     install.packages("XML")

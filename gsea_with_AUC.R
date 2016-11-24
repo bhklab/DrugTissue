@@ -1,4 +1,4 @@
-.libPaths("/")
+.libPaths("/rlibs/")
 
 library(ggplot2)
 library(mgcv)
@@ -28,7 +28,7 @@ gCSI <- downloadPSet("gCSI")
 CCLE <- downloadPSet("CCLE")
 CTRPv2 <- downloadPSet("CTRPv2") 
 
-dataSets <- c(GDSC1000, gCSI, CCLE)
+dataSets <- c(gCSI, CCLE)
 drugs <- list()
 
 mw <- list()
@@ -205,10 +205,7 @@ wt <- gseav
 
 for(dr in sort(rownames(CTRPv2@drug)))
 {
-  if(dr == "bleomycin A2"){dr <- "Bleomycin"}
-  if(dr == "cytarabine hydrochloride"){dr <- "Cytarabine"}
-  #drugNames(CTRPv2) <- gsub(drugNames(CTRPv2), pat="cytarabine hydrochloride", rep="Cytarabine", fixed=TRUE)
-  if(dr == "doxorubicin"){dr <- "Doxorubicin"}
+
   message(paste("CTRPv2", dr, sep = " "))
   
   dataTable <- CTRPv2@sensitivity$info[CTRPv2@sensitivity$info$drugid == dr, ]
