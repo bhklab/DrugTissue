@@ -90,9 +90,9 @@ supplementary figure 2 generated at the end of `supplementary file 2.R`
 Docker
 -------------------------------
 
-Currently publicly hosted at `https://hub.docker.com/r/gosuzombie/tissuedrug/`
+Currently publicly hosted at `https://hub.docker.com/r/gosuzombie/tissuedrug/`. Running the command `docker pull gosuzombie/tissuedrug` will download the latest compiled image
 
-the Docker file is also within the repo. Building the Docker image can be done using the command `docker build .` within the repository directory. 
+Alternatively, the Dockerfile is also within the repo. Building the Docker image can be done using the command `docker build .` within the repository directory. 
 
 Afterwards, the image id can be found using `docker images`
 
