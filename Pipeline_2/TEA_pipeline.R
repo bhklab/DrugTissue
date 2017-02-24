@@ -44,7 +44,7 @@ GSEADir <- file.path(OutDir, "Drug_Tissue_Associations")
 dir.create(GSEADir, showWarnings=FALSE, recursive=TRUE)
 
 #### should AUC values be corrected for genel level of drug sensitivity?
-Adjustment <- TRUE
+Adjustment <- FALSE
 
 ### Min and max number of cell lines in a tissue type
 TissueSize <- c(15, 200)
@@ -120,7 +120,7 @@ PsetVec$GDSC1000@cell[which(PsetVec$GDSC1000@cell[,"GDSC.Tissue.descriptor.1"] =
 
 ########################
 ### run tissue enrichment analysis
-source("GSEA_combined.R")
+source("TEA_analysis.R")
 
 
 ########################

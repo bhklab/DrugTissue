@@ -18,18 +18,19 @@ for(PsetIter in 1:length(PsetVec)){
     }
 
     DrugVec <- rownames(AUCmat)
+    tissue <- as.character(cellInfo(TargetPSet)[ ,"tissueid_TEA"])
+    utissue <- sort(unique(tissue))
   
     pb <- utils::txtProgressBar(min=0, max=length(DrugVec), style=3)
-    
-    EnrichmentMat <- c()
-    PvalMat <- c()
-    TissueMat <- c()
   
     AUCmat.adj <- matrix(NA, nrow=nrow(AUCmat), ncol=ncol(AUCmat), dimnames=dimnames(AUCmat))
+    
+    EnrichmentMat <- PvalueMat <- matrix(NA, ncol=length(DrugVec), nrow=length(utissue), dimnames=list(utissue, DrugVec))
+    
     compl <- FALSE
     for(DrugIter in 1:length(DrugVec)) {
     
-      AUCmat_tissueinf <- data.frame(AUCmat[DrugVec[DrugIter], ], cellInfo(TargetPSet)[ ,"tissueid_TEA"])
+      AUCmat_tissueinf <- data.frame(AUCmat[DrugVec[DrugIter], ], tissue)
       colnames(AUCmat_tissueinf) <- c("AUC", "tissueid")
       if (sum(complete.cases(AUCmat_tissueinf)) >= 10) {
         ### PCA adjustment
@@ -63,9 +64,11 @@ for(PsetIter in 1:length(PsetVec)){
       
           gseares <- try(piano::GSAsummaryTable(gsea_out))
           if (class(gseares) != "try-error" && nrow(gseares) > 1) {
-            PvalueVec <- rep(NA, nrow(gseares))
-            names(PvalueVec) <- as.character(gseares[ , "Name"])
             
+            ### get p-values and enrichment scores
+            PvalueVec <- EnrichmentVec <- rep(NA, nrow(gseares))
+            names(PvalueVec) <- names(EnrichmentVec) <- as.character(gseares[ , "Name"])
+            ### p-values
             if ("p (dist.dir.up)" %in% colnames(gseares)) {
               iix <- is.na(PvalueVec) & !is.na(gseares[ , "p (dist.dir.up)"])
               PvalueVec[iix] <- gseares[iix, "p (dist.dir.up)"]
@@ -75,19 +78,17 @@ for(PsetIter in 1:length(PsetVec)){
               PvalueVec[iix] <- 1
             }
             PvalueVec[which(PvalueVec == 0)] <- 1 / (nperm + nbcore - (nperm %% nbcore) + 1)
-          
             if (length(PvalueVec) < 1 | is.null(PvalueVec)) {
               stop(sprintf("Error for drug %s", DrugVec[DrugIter]))
             }
-      
-            EnrichmentVec <- gseares[, "Stat (dist.dir)"]
-            names(EnrichmentVec) <- as.character(gseares[ , "Name"])
+            PvalueMat[names(PvalueVec), DrugVec[DrugIter]] <- PvalueVec
+            ### enrichment scores
+            if ("Stat (dist.dir)" %in% colnames(gseares)) {
+              iix <- !is.na(gseares[ , "Stat (dist.dir)"])
+              EnrichmentVec[iix] <- gseares[iix, "Stat (dist.dir)"]
+            }
+            EnrichmentMat[names(EnrichmentVec), DrugVec[DrugIter]] <- EnrichmentVec
             
-            TissueVec <- gseares$Name
-      
-            EnrichmentMat <- cbind(EnrichmentMat, EnrichmentVec)
-            PvalMat <- cbind(PvalMat, PvalueVec)
-            TissueMat <- cbind(TissueMat, TissueVec)
             compl <- TRUE
           }
         }
@@ -101,13 +102,10 @@ for(PsetIter in 1:length(PsetVec)){
     }
     message("")
     
-    colnames(EnrichmentMat) <- colnames(PvalMat) <- colnames(TissueMat) <- DrugVec
-    
-    ResultList <- list(EnrichmentMat, PvalMat, TissueMat)
-    names(ResultList) <- c("Enrichment", "Pvalue", "Tissues")
+    ResultList <- list("Enrichment"=EnrichmentMat, "Pvalue"=PvalueMat)
     saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
     saveRDS(object=AUCmat.adj, file=paste(resfn, "AUC.rds", sep="_"))
-    rm(ResultList)
+    rm(list=c("ResultList", "AUCmat.adj"))
     gc()
     
   }
