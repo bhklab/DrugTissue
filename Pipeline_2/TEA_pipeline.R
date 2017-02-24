@@ -23,6 +23,7 @@ library(qpcR)
 library(data.table)
 library(piano)
 library(snowfall)
+library(utils)
 # devtools::install_github(repo="bhklab/PharmacoGx")
 library(PharmacoGx)
 
@@ -33,15 +34,16 @@ library(PharmacoGx)
 options(stringsAsFactors=FALSE)
 
 ### create directory for all the results and intermediate files
-OutDir <- "./Output"
+OutDir <- file.path("Output")
 dir.create(OutDir, showWarnings=FALSE, recursive=TRUE)
 
 ### create directory for enrichment results
 GSEADir <- file.path(OutDir, "Drug_Tissue_Associations")
 dir.create(GSEADir, showWarnings=FALSE, recursive=TRUE)
 
-#### Set adjustment
+#### should AUC values be corrected for genel level of drug sensitivity?
 Adjustment <- TRUE
+
 ### Min and max number of cell lines in a tissue type
 TissueSize <- c(15, 200)
 
@@ -49,7 +51,7 @@ TissueSize <- c(15, 200)
 nperm <- 10000
 
 ### number of CPU cores used for parallelization, use NULL for all the cores minus one
-nbcore <- NULL
+nbcore <- 1
 availcore <- parallel::detectCores()
 if (is.null(nbcore) || nbcore > availcore) { nbcore <- availcore - 1 }
 options("mc.cores"=nbcore)
@@ -114,10 +116,12 @@ PsetVec$GDSC1000@cell[which(PsetVec$GDSC1000@cell[,"GDSC.Tissue.descriptor.1"] =
 PsetVec$GDSC1000@cell[which(PsetVec$GDSC1000@cell[,"GDSC.Tissue.descriptor.1"] == "lung_SCLC" & PsetVec$GDSC1000@cell[ ,"tissueid"] == "lung"), "tissueid_TEA"] <- "SCLC"
 
 
-### run tissue enrichment analysis with original AUC
-runGSEADir <- file.path(GSEADir, "noPCA")
-dir.create(runGSEADir, showWarnings=FALSE, recursive=TRUE)
+########################
+### run tissue enrichment analysis
 source("GSEA_combined.R")
+
+
+########################
 
 
 ### end
