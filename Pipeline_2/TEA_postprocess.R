@@ -47,7 +47,7 @@ if(Adjustment){
 
 names(Output_List) <- c("CCLE", "gCSI",
                         "CTRPv2", "GDSC1000")
-
+###################
 DrugTissueList <- list()
 DrugTissue_Names <- c()
 for(PsetName in names(PsetVec)){
@@ -84,7 +84,7 @@ colnames(DrugTissue_Names) <- c("Tissue", "Drug")
 DrugTissue_Names <- DrugTissue_Names[-which(
   duplicated(paste(DrugTissue_Names[,"Tissue"],
                    DrugTissue_Names[,"Drug"], sep = " "))),]
-
+######################
 DrugTissue_PvalEnrich <- cbind(DrugTissue_Names,
                                matrix(rep(NA, nrow(DrugTissue_Names)*8),
                                       ncol = 8))
@@ -96,9 +96,8 @@ colnames(DrugTissue_PvalEnrich) <- c("Tissue", "Drug",
 rownames(DrugTissue_PvalEnrich) <- paste(DrugTissue_PvalEnrich[,"Tissue"],
                                          DrugTissue_PvalEnrich[,"drug"],
                                          sep = "_")
-
+########################
 for(PsetName in names(PsetVec)){
-  print(PsetName)
   DrugTissueMat <- DrugTissueList[[PsetName]]
   
   MatchRows <- paste(DrugTissueMat[,"Tissue"],
@@ -118,7 +117,14 @@ for(DrugTissueIter in 1:nrow(DrugTissue_PvalEnrich)){
 DrugTissue_PvalEnrich <- cbind(DrugTissue_PvalEnrich,
                                Combined_pval,
                                p.adjust(Combined_pval, method = "fdr"))
+################
+for(PsetName in names(PsetVec)){
+  print(PsetName)
+  DrugTissue_PvalEnrich[,paste("Pval", names(PsetVec), sep = "_")] <- p.adjust(DrugTissue_PvalEnrich[,paste("Pval", names(PsetVec), sep = "_")],
+                                                                               method = "fdr")
+}
+################
 colnames(DrugTissue_PvalEnrich) <- c("Tissue", "Drug",
-                                     paste("Pval", names(PsetVec), sep = "_"),
+                                     paste("FDR", names(PsetVec), sep = "_"),
                                      paste("Enrichment", names(PsetVec),
                                            "Combined_Pval", "Combined_FDR",sep = "_"))
