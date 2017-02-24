@@ -12,13 +12,9 @@ for(PsetIter in 1:length(PsetVec)){
     TargetPSet <- PsetVec[[PsetIter]]
     AUCmat <- PharmacoGx::summarizeSensitivityProfiles(TargetPSet, sensitivity.measure="auc_recomputed")
 
-    if(Adjustment){
-      AUCFilled <- AUCmat
-      aa <- which(is.na(AUCFilled), arr.ind = T)
-      for(NaIter in 1:nrow(aa)){
-        AUCFilled[aa[NaIter,1],aa[NaIter,2]] <- median(c(na.omit(as.numeric(AUCmat[aa[NaIter,1],])),
-                                                         na.omit(as.numeric(AUCmat[,aa[NaIter,2]]))))
-      }
+    if(Adjustment) {
+      AUCFilled <- Hmisc::impute(AUCmat, fun=median)
+      class(AUCFilled) <- class(AUCmat)
     }
 
     DrugVec <- rownames(AUCmat)
@@ -31,19 +27,23 @@ for(PsetIter in 1:length(PsetVec)){
   
     for(DrugIter in 1:length(DrugVec)) {
     
-      AUCmat_tissueinf <- data.frame(AUCmat[DrugVec[DrugIter],], cellInfo(TargetPSet)[ ,"tissueid_TEA"])
+      AUCmat_tissueinf <- data.frame(AUCmat[DrugVec[DrugIter], ], cellInfo(TargetPSet)[ ,"tissueid_TEA"])
       colnames(AUCmat_tissueinf) <- c("AUC", "tissueid")
     
     
       ### PCA adjustment
-      if(Adjustment){
+      if(Adjustment) {
         CorVec <- c()
-        for(DrugIter2 in 1:nrow(AUCmat)){
-          CorVec <- c(CorVec, cor(AUCFilled[DrugVec[DrugIter],], AUCFilled[DrugIter2,], method = "spearman"))
+        for(DrugIter2 in 1:nrow(AUCmat)) {
+          if (sum(complete.cases(AUCmat[DrugVec[DrugIter], ], AUCmat[DrugIter2, ])) > 10) {
+            CorVec <- c(CorVec, cor(AUCmat[DrugVec[DrugIter], ], AUCmat[DrugIter2, ], method = "spearman", use="complete.obs"))
+          } else {
+            CorVec <- c(CorVec, NA)
+          }
         }
         LowCorDrugs <- which(CorVec < max(quantile(na.omit(CorVec))[2], 0))
-        PCA <- prcomp(t(AUCFilled[LowCorDrugs,]))
-        AUCmat_tissueinf[,"AUC"] <- (AUCmat_tissueinf[,"AUC"] - as.numeric(PCA$x[,1]))
+        PCA <- prcomp(t(AUCFilled[LowCorDrugs, ]))
+        AUCmat_tissueinf[ , "AUC"] <- (AUCmat_tissueinf[ , "AUC"] - as.numeric(PCA$x[ , 1]))
       }
       
       AUCmat_tissueinf[,"AUC"] <- (AUCmat_tissueinf[,"AUC"] - median(AUCmat_tissueinf[,"AUC"], na.rm=TRUE)) / mad(AUCmat_tissueinf[,"AUC"], na.rm=TRUE)
@@ -57,7 +57,7 @@ for(PsetIter in 1:length(PsetVec)){
     
       if(sum(table(AUCmat_tissueinf[ , "tissueid"]) >= TissueSize[1] & table(AUCmat_tissueinf[ , "tissueid"]) <= TissueSize[2], na.rm=TRUE) > 1) {
        
-        gsea_out <- piano::runGSA(geneLevelStats=genelevelstats, geneSetStat="gsea", gsc=gsc1,  nPerm=nperm + nbcore - (nperm %% nbcore), ncpus=nbcore, gsSizeLim=TissueSize, adjMethod="none", verbose=FALSE)
+        # gsea_out <- piano::runGSA(geneLevelStats=genelevelstats, geneSetStat="gsea", gsc=gsc1,  nPerm=nperm + nbcore - (nperm %% nbcore), ncpus=nbcore, gsSizeLim=TissueSize, adjMethod="none", verbose=FALSE)
       
         gseares <- piano::GSAsummaryTable(gsea_out)
         gseares <- cbind(gseares, "p"=NA, "p adj"=NA)
@@ -83,12 +83,14 @@ for(PsetIter in 1:length(PsetVec)){
       
       utils::setTxtProgressBar(pb, DrugIter)
     }
+    message("\n")
 
     ResultList <- list(EnrichmentMat, PvalMat, TissueMat)
     names(ResultList) <- c("Enrichment", "Pvalue", "Tissues")
     saveRDS(object=ResultList, file=myfn)
     rm(ResultList)
     gc()
+    
   }
   
 }

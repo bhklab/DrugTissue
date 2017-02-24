@@ -25,6 +25,7 @@ library(data.table)
 library(piano)
 library(snowfall)
 library(utils)
+library(Hmisc)
 # devtools::install_github(repo="bhklab/PharmacoGx")
 library(PharmacoGx)
 
