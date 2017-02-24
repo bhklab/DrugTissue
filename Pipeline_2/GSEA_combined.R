@@ -59,7 +59,7 @@ for(PsetIter in 1:length(PsetVec)){
     
       if(sum(table(AUCmat_tissueinf[ , "tissueid"]) >= TissueSize[1] & table(AUCmat_tissueinf[ , "tissueid"]) <= TissueSize[2], na.rm=TRUE) > 1) {
        
-        # gsea_out <- piano::runGSA(geneLevelStats=genelevelstats, geneSetStat="gsea", gsc=gsc1,  nPerm=nperm + nbcore - (nperm %% nbcore), ncpus=nbcore, gsSizeLim=TissueSize, adjMethod="none", verbose=FALSE)
+        gsea_out <- piano::runGSA(geneLevelStats=genelevelstats, geneSetStat="gsea", gsc=gsc1,  nPerm=nperm + nbcore - (nperm %% nbcore), ncpus=nbcore, gsSizeLim=TissueSize, adjMethod="none", verbose=FALSE)
       
         gseares <- piano::GSAsummaryTable(gsea_out)
         gseares <- cbind(gseares, "p"=NA, "p adj"=NA)
@@ -89,7 +89,7 @@ for(PsetIter in 1:length(PsetVec)){
 
     ResultList <- list(EnrichmentMat, PvalMat, TissueMat)
     names(ResultList) <- c("Enrichment", "Pvalue", "Tissues")
-    # saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
+    saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
     saveRDS(object=AUCmat.adj, file=paste(resfn, "AUC.rds", sep="_"))
     rm(ResultList)
     gc()
