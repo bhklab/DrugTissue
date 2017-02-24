@@ -6,12 +6,12 @@ for(PsetIter in 1:length(PsetVec)){
 
   message(sprintf("%s PharmacoSet [%i drugs]", names(PsetVec[PsetIter]), length(drugNames(PsetVec[[PsetIter]]))))
   ### file to store each results
-  resfn <- file.path(GSEADir, sprintf("%s_%s_ResultsList.rds", names(PsetVec)[PsetIter], ifelse(Adjustment, "adjustedAUC", "originalAUC")))
-  if (!file.exists(resfn)) {
+  resfn <- file.path(GSEADir, sprintf("%s_%s", names(PsetVec)[PsetIter], ifelse(Adjustment, "adjustedAUC", "originalAUC")))
+  if (!file.exists(paste(resfn, "ResultList.rds", sep="_"))) {
   
     TargetPSet <- PsetVec[[PsetIter]]
     AUCmat <- PharmacoGx::summarizeSensitivityProfiles(TargetPSet, sensitivity.measure="auc_recomputed")
-
+    
     if(Adjustment) {
       AUCFilled <- Hmisc::impute(AUCmat, fun=median)
       class(AUCFilled) <- class(AUCmat)
@@ -25,6 +25,7 @@ for(PsetIter in 1:length(PsetVec)){
     PvalMat <- c()
     TissueMat <- c()
   
+    AUCmat.adj <- matrix(NA, nrow=nrow(AUCmat), ncol=ncol(AUCmat), dimnames=dimnames(AUCmat))
     for(DrugIter in 1:length(DrugVec)) {
     
       AUCmat_tissueinf <- data.frame(AUCmat[DrugVec[DrugIter], ], cellInfo(TargetPSet)[ ,"tissueid_TEA"])
@@ -43,7 +44,8 @@ for(PsetIter in 1:length(PsetVec)){
         }
         LowCorDrugs <- which(CorVec < max(quantile(na.omit(CorVec))[2], 0))
         PCA <- prcomp(t(AUCFilled[LowCorDrugs, ]))
-        AUCmat_tissueinf[ , "AUC"] <- (AUCmat_tissueinf[ , "AUC"] - as.numeric(PCA$x[ , 1]))
+        AUCmat_tissueinf[ , "AUC"] <- AUCmat_tissueinf[ , "AUC"] - as.numeric(PCA$x[ , 1])
+        AUCmat.adj[DrugVec[DrugIter], ] <- AUCmat.adj[DrugVec[DrugIter], ] - as.numeric(PCA$x[ , 1])
       }
       
       AUCmat_tissueinf[,"AUC"] <- (AUCmat_tissueinf[,"AUC"] - median(AUCmat_tissueinf[,"AUC"], na.rm=TRUE)) / mad(AUCmat_tissueinf[,"AUC"], na.rm=TRUE)
@@ -83,11 +85,12 @@ for(PsetIter in 1:length(PsetVec)){
       
       utils::setTxtProgressBar(pb, DrugIter)
     }
-    message("\n")
+    message("")
 
     ResultList <- list(EnrichmentMat, PvalMat, TissueMat)
     names(ResultList) <- c("Enrichment", "Pvalue", "Tissues")
-    saveRDS(object=ResultList, file=myfn)
+    # saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
+    saveRDS(object=AUCmat.adj, file=paste(resfn, "AUC.rds", sep="_"))
     rm(ResultList)
     gc()
     
