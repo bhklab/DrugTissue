@@ -1,8 +1,8 @@
 ### tissue enrichment analysis
 
-message("Tissue enrichment analysis")
+message("-------------------------\nTissue enrichment analysis\n-------------------------")
 
-for(PsetIter in 3:length(PsetVec)){
+for(PsetIter in 1:length(PsetVec)){
 
   message(sprintf("%s PharmacoSet [%i drugs]", names(PsetVec[PsetIter]), length(drugNames(PsetVec[[PsetIter]]))))
   ### file to store each results
@@ -61,25 +61,35 @@ for(PsetIter in 3:length(PsetVec)){
        
           gsea_out <- piano::runGSA(geneLevelStats=genelevelstats, geneSetStat="gsea", gsc=gsc1,  nPerm=nperm + nbcore - (nperm %% nbcore), ncpus=nbcore, gsSizeLim=TissueSize, adjMethod="none", verbose=FALSE)
       
-          gseares <- piano::GSAsummaryTable(gsea_out)
-          gseares <- cbind(gseares, "p"=NA, "p adj"=NA)
-          gseares$`p (dist.dir.up)`
-          PvalueVec <- gseares$`p (dist.dir.up)`
-          NAind <- which(is.na(PvalueVec) & !is.na(gseares$`p (dist.dir.dn)`))
-          PvalueVec[which(PvalueVec == 0)] <- 1/(nperm + nbcore - (nperm %% nbcore) + 1)
+          gseares <- try(piano::GSAsummaryTable(gsea_out))
+          if (class(gseares) != "try-error" && nrow(gseares) > 1) {
+            PvalueVec <- rep(NA, nrow(gseares))
+            names(PvalueVec) <- as.character(gseares[ , "Name"])
+            
+            if ("p (dist.dir.up)" %in% colnames(gseares)) {
+              iix <- is.na(PvalueVec) & !is.na(gseares[ , "p (dist.dir.up)"])
+              PvalueVec[iix] <- gseares[iix, "p (dist.dir.up)"]
+            }
+            if ("p (dist.dir.dn)" %in% colnames(gseares)) {
+              iix <- is.na(PvalueVec) & !is.na(gseares[ , "p (dist.dir.dn)"])
+              PvalueVec[iix] <- 1
+            }
+            PvalueVec[which(PvalueVec == 0)] <- 1 / (nperm + nbcore - (nperm %% nbcore) + 1)
           
-          if (length(PvalueVec) < 1 | is.null(PvalueVec)) {
-            stop(sprintf("Error for drug %s", DrugVec[DrugIter]))
+            if (length(PvalueVec) < 1 | is.null(PvalueVec)) {
+              stop(sprintf("Error for drug %s", DrugVec[DrugIter]))
+            }
+      
+            EnrichmentVec <- gseares[, "Stat (dist.dir)"]
+            names(EnrichmentVec) <- as.character(gseares[ , "Name"])
+            
+            TissueVec <- gseares$Name
+      
+            EnrichmentMat <- cbind(EnrichmentMat, EnrichmentVec)
+            PvalMat <- cbind(PvalMat, PvalueVec)
+            TissueMat <- cbind(TissueMat, TissueVec)
+            compl <- TRUE
           }
-      
-          EnrichmentVec <- gseares$`Stat (dist.dir)`
-      
-          TissueVec <- gseares$Name
-      
-          EnrichmentMat <- cbind(EnrichmentMat, EnrichmentVec)
-          PvalMat <- cbind(PvalMat, PvalueVec)
-          TissueMat <- cbind(TissueMat, TissueVec)
-          compl <- TRUE
         }
       } 
       if (!compl) {
