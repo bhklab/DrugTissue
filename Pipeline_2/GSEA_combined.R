@@ -66,8 +66,9 @@ for(PsetIter in 1:length(PsetVec)){
         gseares$`p (dist.dir.up)`
         PvalueVec <- gseares$`p (dist.dir.up)`
         NAind <- which(is.na(PvalueVec) & !is.na(gseares$`p (dist.dir.dn)`))
-      
-        PvalueVec[NAind] <- 1
+        if(length(NAind) > 0){
+          PvalueVec[NAind] <- 1
+        }
         PvalueVec[which(PvalueVec == 0)] <- 1/(nperm + nbcore - (nperm %% nbcore) + 1)
       
         EnrichmentVec <- gseares$`Stat (dist.dir)`

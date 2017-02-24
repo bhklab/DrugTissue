@@ -35,14 +35,14 @@ if(Adjustment){
   CTRPv2_output <- readRDS(paste(Directory,"3_Adjusted_ResultList.rds", sep = ""))
   GDSC1000_output <- readRDS(paste(Directory,"4_Adjusted_ResultList.rds", sep = ""))
   Output_List <- list(CCLE_output, gCSI_output,
-                      CTRPv2_output, GDSC1000)
+                      CTRPv2_output, GDSC1000_output)
 }else{
   CCLE_output <- readRDS(paste(Directory, "1_ResultList.rds", sep = ""))
   gCSI_output <- readRDS(paste(Directory, "2_ResultList.rds", sep = ""))
   CTRPv2_output <- readRDS(paste(Directory, "3_ResultList.rds", sep = ""))
   GDSC1000 <- readRDS(paste(Directory, "4_ResultList.rds", sep = ""))
   Output_List <- list(CCLE_output, gCSI_output,
-                      CTRPv2_output, GDSC1000)
+                      CTRPv2_output, GDSC1000_output)
 }
 
 names(Output_List) <- c("CCLE", "gCSI",
@@ -50,7 +50,7 @@ names(Output_List) <- c("CCLE", "gCSI",
 ###################
 DrugTissueList <- list()
 DrugTissue_Names <- c()
-for(PsetName in names(PsetVec)){
+for(PsetName in names(PsetVec)[3]){
   print(PsetName)
   
   TargetPSet <- PsetVec[[PsetName]]
