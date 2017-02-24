@@ -25,9 +25,8 @@ for(PsetIter in 1:length(PsetVec)){
   
     AUCmat.adj <- matrix(NA, nrow=nrow(AUCmat), ncol=ncol(AUCmat), dimnames=dimnames(AUCmat))
     
-    EnrichmentMat <- PvalueMat <- matrix(NA, ncol=length(DrugVec), nrow=length(utissue), dimnames=list(utissue, DrugVec))
+    EnrichmentMat <- PvalueMat <- NcellineMat <- matrix(NA, ncol=length(DrugVec), nrow=length(utissue), dimnames=list(utissue, DrugVec))
     
-    compl <- FALSE
     for(DrugIter in 1:length(DrugVec)) {
     
       AUCmat_tissueinf <- data.frame(AUCmat[DrugVec[DrugIter], ], tissue)
@@ -54,17 +53,21 @@ for(PsetIter in 1:length(PsetVec)){
         AUCmat_tissueinf[which(grepl("lymphoid", AUCmat_tissueinf[ , "tissueid"])), "tissueid"] <- NA
         AUCmat_tissueinf <- na.omit(AUCmat_tissueinf)
         celline_tissueinf <- cbind("g"=rownames(AUCmat_tissueinf), "s"=AUCmat_tissueinf[ , "tissueid"])
-    
+        
+        ### number of cell lines per tissue type
+        tt <- table(celline_tissueinf[ , "s"])
+        NcellineMat[names(tt), DrugVec[DrugIter]] <- tt
+        
         genelevelstats <- AUCmat_tissueinf[ , "AUC", drop=FALSE]
         gsc1 <- piano::loadGSC(celline_tissueinf)
-    
+
         if(sum(table(AUCmat_tissueinf[ , "tissueid"]) >= TissueSize[1] & table(AUCmat_tissueinf[ , "tissueid"]) <= TissueSize[2], na.rm=TRUE) > 1) {
-       
+
           gsea_out <- piano::runGSA(geneLevelStats=genelevelstats, geneSetStat="gsea", gsc=gsc1,  nPerm=nperm + nbcore - (nperm %% nbcore), ncpus=nbcore, gsSizeLim=TissueSize, adjMethod="none", verbose=FALSE)
-      
+
           gseares <- try(piano::GSAsummaryTable(gsea_out))
           if (class(gseares) != "try-error" && nrow(gseares) > 1) {
-            
+
             ### get p-values and enrichment scores
             PvalueVec <- EnrichmentVec <- rep(NA, nrow(gseares))
             names(PvalueVec) <- names(EnrichmentVec) <- as.character(gseares[ , "Name"])
@@ -88,28 +91,22 @@ for(PsetIter in 1:length(PsetVec)){
               EnrichmentVec[iix] <- gseares[iix, "Stat (dist.dir)"]
             }
             EnrichmentMat[names(EnrichmentVec), DrugVec[DrugIter]] <- EnrichmentVec
-            
-            compl <- TRUE
+
           }
         }
       } 
-      if (!compl) {
-        EnrichmentMat <- cbind(EnrichmentMat, NA)
-        PvalMat <- cbind(PvalMat, NA)
-        TissueMat <- cbind(TissueMat, NA)
-      }
       utils::setTxtProgressBar(pb, DrugIter)
     }
     message("")
     
-    ResultList <- list("Enrichment"=EnrichmentMat, "Pvalue"=PvalueMat)
+    if (Adjustment) { AUCm <- AUCmat.adj } else { AUCm <- AUCmat }
+    ResultList <- list("Enrichment"=EnrichmentMat, "Pvalue"=PvalueMat, "N"=NcellineMat, "AUC"=AUCm)
     saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
-    saveRDS(object=AUCmat.adj, file=paste(resfn, "AUC.rds", sep="_"))
-    rm(list=c("ResultList", "AUCmat.adj"))
+    saveRDS(object=AUCm, file=paste(resfn, "AUC.rds", sep="_"))
+    saveRDS(object=NcellineMat, file=paste(resfn, "Ncelline.rds", sep="_"))
+    rm(list=c("ResultList", "AUCmat.adj", "AUCmat", "AUCm", "EnrichmentMat", "PvalueMat", "NcellineMat"))
     gc()
-    
   }
-  
 }
 
 ### end
