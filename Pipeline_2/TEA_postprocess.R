@@ -1,46 +1,17 @@
-#################
-rm(list = ls())
-require(gdata)
-require(e1071)
-require(genefu)
-library(Biobase)
-require(xtable)
-library(biomaRt)
-library(gplots)
-library(devtools)
-library(preprocessCore)
-library(rgl)
-library(qpcR)
-library(data.table)
-library(piano)
-library(snowfall)
-# devtools::install_github(repo="bhklab/PharmacoGx")
-library(PharmacoGx)
-###################
-Adjustment <- TRUE
-##############################
-CTRPv2 <- downloadPSet("CTRPv2")
-GDSC1000 <- downloadPSet("GDSC1000")
-CCLE <- downloadPSet("CCLE")
-gCSI <- downloadPSet("gCSI")
-PsetVec <- list(CCLE, gCSI, CTRPv2, GDSC1000)
-names(PsetVec) <- c("CCLE", "gCSI",
-                    "CTRPv2", "GDSC1000") 
-############################## Combination of significance of interactions between datasets
-Directory <- "~/Desktop/Drug_Tissue_Association/GSEA/"
 
+############################## Combination of significance of interactions between datasets
 if(Adjustment){
-  CCLE_output <- readRDS(paste(Directory,"1_Adjusted_ResultList.rds", sep = ""))
-  gCSI_output <- readRDS(paste(Directory,"2_Adjusted_ResultList.rds", sep = ""))
-  CTRPv2_output <- readRDS(paste(Directory,"3_Adjusted_ResultList.rds", sep = ""))
-  GDSC1000_output <- readRDS(paste(Directory,"4_Adjusted_ResultList.rds", sep = ""))
+  CCLE_output <- readRDS(paste(GSEADir,"1_Adjusted_ResultList.rds", sep = ""))
+  gCSI_output <- readRDS(paste(GSEADir,"2_Adjusted_ResultList.rds", sep = ""))
+  CTRPv2_output <- readRDS(paste(GSEADir,"3_Adjusted_ResultList.rds", sep = ""))
+  GDSC1000_output <- readRDS(paste(GSEADir,"4_Adjusted_ResultList.rds", sep = ""))
   Output_List <- list(CCLE_output, gCSI_output,
                       CTRPv2_output, GDSC1000_output)
 }else{
-  CCLE_output <- readRDS(paste(Directory, "1_ResultList.rds", sep = ""))
-  gCSI_output <- readRDS(paste(Directory, "2_ResultList.rds", sep = ""))
-  CTRPv2_output <- readRDS(paste(Directory, "3_ResultList.rds", sep = ""))
-  GDSC1000 <- readRDS(paste(Directory, "4_ResultList.rds", sep = ""))
+  CCLE_output <- readRDS(paste(GSEADir, "1_ResultList.rds", sep = ""))
+  gCSI_output <- readRDS(paste(GSEADir, "2_ResultList.rds", sep = ""))
+  CTRPv2_output <- readRDS(paste(GSEADir, "3_ResultList.rds", sep = ""))
+  GDSC1000 <- readRDS(paste(GSEADir, "4_ResultList.rds", sep = ""))
   Output_List <- list(CCLE_output, gCSI_output,
                       CTRPv2_output, GDSC1000_output)
 }
@@ -111,7 +82,7 @@ for(PsetName in names(PsetVec)){
 Combined_pval <- c()
 for(DrugTissueIter in 1:nrow(DrugTissue_PvalEnrich)){
   Combined_pval <- c(Combined_pval,
-                     combine.test(c(DrugTissue_PvalEnrich[,c(paste("Pval", names(PsetVec), sep = "_"))]),
+                     survcomp::combine.test(c(DrugTissue_PvalEnrich[,c(paste("Pval", names(PsetVec), sep = "_"))]),
                                   weight = rep(1,4), method = "z.transform"))
 }
 DrugTissue_PvalEnrich <- cbind(DrugTissue_PvalEnrich,

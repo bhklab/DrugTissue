@@ -2,7 +2,7 @@
 
 message("Tissue enrichment analysis")
 
-for(PsetIter in 1:length(PsetVec)){
+for(PsetIter in 3:length(PsetVec)){
 
   message(sprintf("%s PharmacoSet [%i drugs]", names(PsetVec[PsetIter]), length(drugNames(PsetVec[[PsetIter]]))))
   ### file to store each results
@@ -55,7 +55,7 @@ for(PsetIter in 1:length(PsetVec)){
         celline_tissueinf <- cbind("g"=rownames(AUCmat_tissueinf), "s"=AUCmat_tissueinf[ , "tissueid"])
     
         genelevelstats <- AUCmat_tissueinf[ , "AUC", drop=FALSE]
-        gsc1 <- piano:::loadGSC(celline_tissueinf)
+        gsc1 <- piano::loadGSC(celline_tissueinf)
     
         if(sum(table(AUCmat_tissueinf[ , "tissueid"]) >= TissueSize[1] & table(AUCmat_tissueinf[ , "tissueid"]) <= TissueSize[2], na.rm=TRUE) > 1) {
        
@@ -66,10 +66,11 @@ for(PsetIter in 1:length(PsetVec)){
           gseares$`p (dist.dir.up)`
           PvalueVec <- gseares$`p (dist.dir.up)`
           NAind <- which(is.na(PvalueVec) & !is.na(gseares$`p (dist.dir.dn)`))
-          if(length(NAind) > 0){
-            PvalueVec[NAind] <- 1
-          }
           PvalueVec[which(PvalueVec == 0)] <- 1/(nperm + nbcore - (nperm %% nbcore) + 1)
+          
+          if (length(PvalueVec) < 1 | is.null(PvalueVec)) {
+            stop(sprintf("Error for drug %s", DrugVec[DrugIter]))
+          }
       
           EnrichmentVec <- gseares$`Stat (dist.dir)`
       

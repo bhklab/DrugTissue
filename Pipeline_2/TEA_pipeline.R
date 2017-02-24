@@ -53,7 +53,7 @@ TissueSize <- c(15, 200)
 nperm <- 10000
 
 ### number of CPU cores used for parallelization, use NULL for all the cores minus one
-nbcore <- 1
+nbcore <- NULL
 availcore <- parallel::detectCores()
 if (is.null(nbcore) || nbcore > availcore) { nbcore <- availcore - 1 }
 options("mc.cores"=nbcore)
