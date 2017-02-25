@@ -123,6 +123,33 @@ PsetVec$GDSC1000@cell[!is.na(PsetVec$GDSC1000@cell[ , "tissueid_TEA"]) & PsetVec
 PsetVec$GDSC1000@cell[which(PsetVec$GDSC1000@cell[,"GDSC.Tissue.descriptor.1"] == "lung_NSCLC" & PsetVec$GDSC1000@cell[ ,"tissueid"] == "lung"), "tissueid_TEA"] <- "NSCLC"
 PsetVec$GDSC1000@cell[which(PsetVec$GDSC1000@cell[,"GDSC.Tissue.descriptor.1"] == "lung_SCLC" & PsetVec$GDSC1000@cell[ ,"tissueid"] == "lung"), "tissueid_TEA"] <- "SCLC"
 
+########################
+### list drugs and cell lines and drugs in all datasets
+### drugs
+drugs <- sapply(PsetVec, PharmacoGx::drugNames)
+drugs <- sort(unique(do.call(c, drugs)))
+drugsMat <- matrix(NA, nrow=length(drugs), ncol=length(PsetVec), dimnames=list(drugs, names(PsetVec)))
+for (PsetIter in 1:length(PsetVec)) {
+  drugsMat[PharmacoGx::drugNames(PsetVec[[PsetIter]]), names(PsetVec)[PsetIter]] <- "YES"
+}
+### cell lines
+cells <- sapply(PsetVec, PharmacoGx::cellNames)
+cells <- sort(unique(do.call(c, cells)))
+cellsMat <- matrix(NA, nrow=length(cells), ncol=length(PsetVec), dimnames=list(cells, names(PsetVec)))
+for (PsetIter in 1:length(PsetVec)) {
+  cellsMat[PharmacoGx::cellNames(PsetVec[[PsetIter]]), names(PsetVec)[PsetIter]] <- "YES"
+}
+### tissues
+tissues <- sapply(PsetVec, function(x) { return (sort(unique(PharmacoGx::cellInfo(x)[ , "tissueid_TEA"]))) })
+tissues <- sort(unique(do.call(c, tissues)))
+tissuesMat <- matrix(NA, nrow=length(tissues), ncol=length(PsetVec), dimnames=list(tissues, names(PsetVec)))
+for (PsetIter in 1:length(PsetVec)) {
+  tt <- sort(unique(PharmacoGx::cellInfo(PsetVec[[PsetIter]])[ , "tissueid_TEA"]))
+  tissuesMat[tt, names(PsetVec)[PsetIter]] <- "YES"
+}
+### save
+ll <- list("Drugs"=data.frame(drugsMat), "Cell lines"=data.frame(cellsMat), "Tissue Types"=data.frame(tissuesMat))
+WriteXLS::WriteXLS("ll", ExcelFileName=file.path(OutDir, sprintf("Dataset_Info.xlsx")), row.names=TRUE)
 
 ########################
 
