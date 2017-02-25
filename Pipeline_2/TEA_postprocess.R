@@ -131,7 +131,7 @@ postprocessingTEA <- function(ResultFileNames, PsetVec, Adjustment, GSEADir){
   
   saveRDS(DrugTissue_PvalEnrich, file = paste(GSEADir, "DrugTissue_PvalEnrich_", ifelse(Adjustment, "adjustedAUC", "originalAUC"),"AUC.rds"))
   
-  return (DrugTissue_PvalEnrich)
+  return(DrugTissue_PvalEnrich)
 }
 
 ########################
@@ -143,7 +143,7 @@ ResultFileNames <- c("CCLE_adjustedAUC_ResultList.rds",
                      "GDSC1000_adjustedAUC_ResultList.rds")
 names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
 Adjustment <- TRUE
-postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
+Adjusted_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
 
 ### Original
 ResultFileNames <- c("CCLE_originalAUC_ResultList.rds",
@@ -152,10 +152,11 @@ ResultFileNames <- c("CCLE_originalAUC_ResultList.rds",
                      "GDSC1000_originalAUC_ResultList.rds")
 names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
 Adjustment <- FALSE
-postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
+Original_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
 
-tt <- list("Drug Tissue Associations"=DrugTissue_PvalEnrich)
-WriteXLS::WriteXLS(, file=file.path(GSEADir, "DrugTissue_PvalEnrich_", ifelse(Adjustment, "adjustedAUC", "originalAUC"),"AUC.xls"))
+tt <- list("Drug Tissue Associations (adjusted AUC)"=Adjusted_Results,
+           "Drug Tissue Associations (original AUC)"=Original_Results)
+WriteXLS::WriteXLS("tt", file=file.path(GSEADir, "DrugTissue_PvalEnrich_", ifelse(Adjustment, "adjustedAUC", "originalAUC"),"AUC.xls"))
 
 
 ### end
