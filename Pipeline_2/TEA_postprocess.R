@@ -1,24 +1,24 @@
 ########################
 ### functions
 ########################
+
 postprocessingTEA <- function(ResultFileNames, PsetVec, Adjustment, GSEADir){
   
   ######################## Cell line number matrices
-  CCLE_cclMat <- readRDS(paste(GSEADir, "CCLE_originalAUC_Ncelline.rds", sep = ""))
-  gCSI_cclMat <- readRDS(paste(GSEADir, "gCSI_originalAUC_Ncelline.rds", sep = ""))
-  CTRPv2_cclMat <- readRDS(paste(GSEADir, "CTRPv2_originalAUC_Ncelline.rds", sep = ""))
-  GDSC1000_cclMat <- readRDS(paste(GSEADir, "GDSC1000_originalAUC_Ncelline.rds", sep = ""))
+  CCLE_cclMat <- readRDS(file.path(GSEADir, "CCLE_originalAUC_Ncelline.rds"))
+  gCSI_cclMat <- readRDS(file.path(GSEADir, "gCSI_originalAUC_Ncelline.rds"))
+  CTRPv2_cclMat <- readRDS(file.path(GSEADir, "CTRPv2_originalAUC_Ncelline.rds"))
+  GDSC1000_cclMat <- readRDS(file.path(GSEADir, "GDSC1000_originalAUC_Ncelline.rds"))
   
   CellNum_List <- list(CCLE_cclMat, gCSI_cclMat,
                        CTRPv2_cclMat, GDSC1000_cclMat)
   names(CellNum_List) <- names(PsetVec)
   ######################## Result lists
-  CCLE_output <- readRDS(paste(GSEADir,ResultFileNames["CCLE"], sep = ""))
-  gCSI_output <- readRDS(paste(GSEADir,ResultFileNames["gCSI"], sep = ""))
-  CTRPv2_output <- readRDS(paste(GSEADir,ResultFileNames["CTRPv2"], sep = ""))
-  GDSC1000_output <- readRDS(paste(GSEADir,ResultFileNames["GDSC1000"], sep = ""))
-  Output_List <- list(CCLE_output, gCSI_output,
-                      CTRPv2_output, GDSC1000_output)
+  CCLE_output <- readRDS(file.path(GSEADir,ResultFileNames["CCLE"]))
+  gCSI_output <- readRDS(file.path(GSEADir,ResultFileNames["gCSI"]))
+  CTRPv2_output <- readRDS(file.path(GSEADir,ResultFileNames["CTRPv2"]))
+  GDSC1000_output <- readRDS(file.path(GSEADir,ResultFileNames["GDSC1000"]))
+  Output_List <- list(CCLE_output, gCSI_output, CTRPv2_output, GDSC1000_output)
   
   names(Output_List) <- names(PsetVec)
   ################### Flattened matrix for each PSet
@@ -129,16 +129,14 @@ postprocessingTEA <- function(ResultFileNames, PsetVec, Adjustment, GSEADir){
                                        "Combined_Pval", "Combined_FDR")
   DrugTissue_PvalEnrich <- as.data.frame(DrugTissue_PvalEnrich)
   
-  if(Adjustment){
-    FileName <- "adjusted"
-  }else{
-    FileName <- "original"
-  }
-  saveRDS(DrugTissue_PvalEnrich, file = paste(GSEADir, "DrugTissue_PvalEnrich_",FileName,"AUC.rds"))
-  WriteXLS(DrugTissue_PvalEnrich, file = paste(GSEADir, "DrugTissue_PvalEnrich_",FileName,"AUC.xls"))
+  saveRDS(DrugTissue_PvalEnrich, file = paste(GSEADir, "DrugTissue_PvalEnrich_", ifelse(Adjustment, "adjustedAUC", "originalAUC"),"AUC.rds"))
+  
+  return (DrugTissue_PvalEnrich)
 }
-### end
-###################### Adjusted
+
+########################
+
+### Adjusted
 ResultFileNames <- c("CCLE_adjustedAUC_ResultList.rds",
                      "gCSI_adjustedAUC_ResultList.rds",
                      "CTRPv2_adjustedAUC_ResultList.rds",
@@ -146,7 +144,8 @@ ResultFileNames <- c("CCLE_adjustedAUC_ResultList.rds",
 names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
 Adjustment <- TRUE
 postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
-#################### Original
+
+### Original
 ResultFileNames <- c("CCLE_originalAUC_ResultList.rds",
                      "gCSI_originalAUC_ResultList.rds",
                      "CTRPv2_originalAUC_ResultList.rds",
@@ -154,3 +153,10 @@ ResultFileNames <- c("CCLE_originalAUC_ResultList.rds",
 names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
 Adjustment <- FALSE
 postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
+
+tt <- list("Drug Tissue Associations"=DrugTissue_PvalEnrich)
+WriteXLS::WriteXLS(, file=file.path(GSEADir, "DrugTissue_PvalEnrich_", ifelse(Adjustment, "adjustedAUC", "originalAUC"),"AUC.xls"))
+
+
+### end
+
