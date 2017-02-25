@@ -26,6 +26,7 @@ library(piano)
 library(snowfall)
 library(utils)
 library(Hmisc)
+library(WriteXLS)
 # devtools::install_github(repo="bhklab/PharmacoGx")
 library(PharmacoGx)
 
@@ -44,10 +45,12 @@ GSEADir <- file.path(OutDir, "Drug_Tissue_Associations")
 dir.create(GSEADir, showWarnings=FALSE, recursive=TRUE)
 
 #### should AUC values be corrected for genel level of drug sensitivity?
-Adjustment <- FALSE
+Adjustment <- TRUE
 
 ### Min and max number of cell lines in a tissue type
 TissueSize <- c(15, 200)
+
+FDRcutoff <- 0.05
 
 ### number of permutations for enrichment analysis
 nperm <- 10000
