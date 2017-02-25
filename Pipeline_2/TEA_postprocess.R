@@ -1,6 +1,6 @@
 
 ######################
-Adjustment <- (0, 1)
+Adjustment <- c(0, 1)
 for(Adjust in Adjustment){
   #######################
   FDRcutoff <- 0.05
