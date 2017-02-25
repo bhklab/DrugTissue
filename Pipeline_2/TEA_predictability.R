@@ -2,7 +2,7 @@
 ### functions
 ########################
 
-predictabilityTEA <- function (drugTissueAssocs, FDRcutoff, PsetVec, Adjustment, GSEADir) {
+predictabilityTEA <- function (drugTissueAssocs, FDRcutoff, PsetVec, Adjustment, quantileAUC, GSEADir) {
   ### select the significant associations in meta-analysis
   iix <- !is.na(drugTissueAssocs[ , "Combined_FDR"]) & drugTissueAssocs[ , "Combined_FDR"] < FDRcutoff
   drugTissueAssocs <- drugTissueAssocs[iix, , drop=FALSE]
@@ -43,21 +43,22 @@ predictabilityTEA <- function (drugTissueAssocs, FDRcutoff, PsetVec, Adjustment,
         names(bb) <- colnames(x)
         aa <- x[drug, ]
         if (sum(complete.cases(bb, aa)) >= 10) {
+          qAUC <- quantile(aa[which(bb == 1)], probs=quantileAUC, na.rm=TRUE)
           cindex <- Hmisc::rcorr.cens(x=bb, S=Surv(aa, rep(1, length(aa))), outx=TRUE)
-          res <- list("cindex"=cindex["C Index"], "se"=cindex["S.D."])
+          res <- list("cindex"=cindex["C Index"], "se"=cindex["S.D."], "QuantileAUC"=qAUC)
         }
       }
       return (res)
     }, drug=dd, tissue=tt, celltissue=CellTissue)
     cis <- cis[!sapply(cis, is.null)]
     if (length(cis) < 1) {
-      cis <- NA
+      ci2 <- NA
     } else {
-      cis <- survcomp::combine.est(x=sapply(cis, function (x) { return (x[[1]]) }), x.se=sapply(cis, function (x) { return (x[[2]]) }), hetero=TRUE)$estimate
+      ci2 <- survcomp::combine.est(x=sapply(cis, function (x) { return (x[[1]]) }), x.se=sapply(cis, function (x) { return (x[[2]]) }), hetero=TRUE)$estimate
     }
-    ci <- c(ci, cis)
+    ci <- rbind(ci, c("Cindex"=ci2, "quantileAUC"=median(sapply(cis, function (x) { return (x[[3]]) }), na.rm=TRUE)))
   }
-  names(ci) <- rownames(drugTissueAssocs)
+  rownames(ci) <- rownames(drugTissueAssocs)
  
   return (ci)
 }
@@ -66,18 +67,25 @@ predictabilityTEA <- function (drugTissueAssocs, FDRcutoff, PsetVec, Adjustment,
 
 ### list of drug-tissue associations and their statistics
 ### originalAUC
-drugTissueAssocs <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "originalAUC")))
-drugTissueAssocs <- data.frame(drugTissueAssocs)
-ci.original <- predictabilityTEA(drugTissueAssocs, FDRcutoff, PsetVec, Adjustment=FALSE, GSEADir)
+drugTissueAssocs.original <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "originalAUC")))
+drugTissueAssocs.original <- data.frame(drugTissueAssocs.original)
+ci.original <- predictabilityTEA(drugTissueAssocs.original, FDRcutoff, PsetVec, Adjustment=FALSE, quantileAUC, GSEADir)
 ### adjustedAUC
-drugTissueAssocs <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "adjustedAUC")))
-drugTissueAssocs <- data.frame(drugTissueAssocs)
-ci.adjusted <- predictabilityTEA(drugTissueAssocs, FDRcutoff, PsetVec, Adjustment=TRUE, GSEADir)
+drugTissueAssocs.adjusted <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "adjustedAUC")))
+drugTissueAssocs.adjusted <- data.frame(drugTissueAssocs.adjusted)
+ci.adjusted <- predictabilityTEA(drugTissueAssocs.adjusted, FDRcutoff, PsetVec, Adjustment=TRUE, quantileAUC, GSEADir)
 
 
+intersect(rownames(ci.original), rownames(ci.adjusted))
 
-ll <- list("")
-WriteXLS::WriteXLS
+drugTissueAssocs <- cbind(drugTissueAssocs.original[rownames(ci.original), c("Tissue", "Drug", "Combined_Pval", "Combined_FDR")], ci.original, "Num_Cell_Lines"=apply(data.matrix(drugTissueAssocs.original[rownames(ci.original), c("CCL_Num_CCLE", "CCL_Num_gCSI", "CCL_Num_CTRPv2", "CCL_Num_GDSC1000")]), 1, sum, na.rm=TRUE), "Adjustment"="NO")
+drugTissueAssocs <- rbind(drugTissueAssocs, cbind(drugTissueAssocs.adjusted[rownames(ci.adjusted), c("Tissue", "Drug", "Combined_Pval", "Combined_FDR")], ci.adjusted, "Num_Cell_Lines"=apply(data.matrix(drugTissueAssocs.adjusted[rownames(ci.adjusted), c("CCL_Num_CCLE", "CCL_Num_gCSI", "CCL_Num_CTRPv2", "CCL_Num_GDSC1000")]), 1, sum, na.rm=TRUE), "Adjustment"="YES"))
+
+drugTissueAssocs <- drugTissueAssocs[order(rownames(drugTissueAssocs)), , drop=FALSE]
+
+
+ll <- list("Drug Tissue Associations"=drugTissueAssocs)
+WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xlsx", ceiling(FDRcutoff*100))))
 
 
 
