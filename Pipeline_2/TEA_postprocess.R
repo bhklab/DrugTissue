@@ -129,21 +129,12 @@ postprocessingTEA <- function(ResultFileNames, PsetVec, Adjustment, GSEADir){
                                        "Combined_Pval", "Combined_FDR")
   DrugTissue_PvalEnrich <- as.data.frame(DrugTissue_PvalEnrich)
   
-  saveRDS(DrugTissue_PvalEnrich, file = paste(GSEADir, "DrugTissue_PvalEnrich_", ifelse(Adjustment, "adjustedAUC", "originalAUC"),"AUC.rds"))
+  saveRDS(DrugTissue_PvalEnrich, file=file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", ifelse(Adjustment, "adjustedAUC", "originalAUC"))))
   
   return(DrugTissue_PvalEnrich)
 }
 
 ########################
-
-### Adjusted
-ResultFileNames <- c("CCLE_adjustedAUC_ResultList.rds",
-                     "gCSI_adjustedAUC_ResultList.rds",
-                     "CTRPv2_adjustedAUC_ResultList.rds",
-                     "GDSC1000_adjustedAUC_ResultList.rds")
-names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
-Adjustment <- TRUE
-Adjusted_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
 
 ### Original
 ResultFileNames <- c("CCLE_originalAUC_ResultList.rds",
@@ -151,12 +142,18 @@ ResultFileNames <- c("CCLE_originalAUC_ResultList.rds",
                      "CTRPv2_originalAUC_ResultList.rds",
                      "GDSC1000_originalAUC_ResultList.rds")
 names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
-Adjustment <- FALSE
-Original_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment, GSEADir)
+Original_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment=FALSE, GSEADir)
 
-tt <- list("Drug Tissue Associations (adjusted AUC)"=Adjusted_Results,
-           "Drug Tissue Associations (original AUC)"=Original_Results)
-WriteXLS::WriteXLS("tt", file=file.path(GSEADir, "DrugTissue_PvalEnrich_", ifelse(Adjustment, "adjustedAUC", "originalAUC"),"AUC.xls"))
+### Adjusted
+ResultFileNames <- c("CCLE_adjustedAUC_ResultList.rds",
+                     "gCSI_adjustedAUC_ResultList.rds",
+                     "CTRPv2_adjustedAUC_ResultList.rds",
+                     "GDSC1000_adjustedAUC_ResultList.rds")
+names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
+Adjusted_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment=TRUE, GSEADir)
+
+tt <- list("Drug_Tissue_OriginalAUC"=Original_Results, "Drug_Tissue_AdjustedAUC"=Adjusted_Results)
+WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xlsx"))
 
 
 ### end
