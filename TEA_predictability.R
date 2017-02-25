@@ -76,13 +76,12 @@ drugTissueAssocs.adjusted <- data.frame(drugTissueAssocs.adjusted)
 ci.adjusted <- predictabilityTEA(drugTissueAssocs.adjusted, FDRcutoff, PsetVec, Adjustment=TRUE, quantileAUC, GSEADir)
 
 
-intersect(rownames(ci.original), rownames(ci.adjusted))
+# intersect(rownames(ci.original), rownames(ci.adjusted))
 
 drugTissueAssocs <- cbind(drugTissueAssocs.original[rownames(ci.original), c("Tissue", "Drug", "Combined_Pval", "Combined_FDR")], ci.original, "Num_Cell_Lines"=apply(data.matrix(drugTissueAssocs.original[rownames(ci.original), c("CCL_Num_CCLE", "CCL_Num_gCSI", "CCL_Num_CTRPv2", "CCL_Num_GDSC1000")]), 1, sum, na.rm=TRUE), "Adjustment"="NO")
 drugTissueAssocs <- rbind(drugTissueAssocs, cbind(drugTissueAssocs.adjusted[rownames(ci.adjusted), c("Tissue", "Drug", "Combined_Pval", "Combined_FDR")], ci.adjusted, "Num_Cell_Lines"=apply(data.matrix(drugTissueAssocs.adjusted[rownames(ci.adjusted), c("CCL_Num_CCLE", "CCL_Num_gCSI", "CCL_Num_CTRPv2", "CCL_Num_GDSC1000")]), 1, sum, na.rm=TRUE), "Adjustment"="YES"))
 
 drugTissueAssocs <- drugTissueAssocs[order(rownames(drugTissueAssocs)), , drop=FALSE]
-
 
 ll <- list("Drug Tissue Associations"=drugTissueAssocs)
 WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xlsx", ceiling(FDRcutoff*100))))

@@ -3,6 +3,7 @@
 
 
 # .libPaths("/mnt/work1/users/bhklab/Rlib")
+# source("TEA_pipeline.R")
 
 ########################
 ### clean workspace
@@ -44,9 +45,6 @@ dir.create(OutDir, showWarnings=FALSE, recursive=TRUE)
 GSEADir <- file.path(OutDir, "Drug_Tissue_Associations")
 dir.create(GSEADir, showWarnings=FALSE, recursive=TRUE)
 
-#### should AUC values be corrected for genel level of drug sensitivity?
-Adjustment <- TRUE
-
 ### quantile for AUC in each tissue type of interest
 quantileAUC <- 0.75
 
@@ -56,7 +54,7 @@ TissueSize <- c(15, 200)
 FDRcutoff <- 0.05
 
 ### number of permutations for enrichment analysis
-nperm <- 10000
+nperm <- 1000000
 
 ### number of CPU cores used for parallelization, use NULL for all the cores minus one
 nbcore <- NULL
@@ -153,7 +151,12 @@ WriteXLS::WriteXLS("ll", ExcelFileName=file.path(OutDir, sprintf("Dataset_Info.x
 
 ########################
 
-### run tissue enrichment analysis
+### run tissue enrichment analysis with original AUC
+Adjustment <- FALSE
+source("TEA_analysis.R")
+
+### run tissue enrichment analysis with AUC values adjusted for genel level of drug sensitivity
+Adjustment <- TRUE
 source("TEA_analysis.R")
 
 ### combine the results
@@ -162,9 +165,10 @@ source("TEA_postprocess.R")
 ### compute predictability of significant interactions
 source("TEA_predictability.R")
 
-
 ########################
+### save session info
 
+write(toLatex(sessionInfo(), locale=FALSE), file=file.path(OutDir, "sessionInfoR.tex"), append=FALSE)
 
 ### end
 
