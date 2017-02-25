@@ -1,6 +1,6 @@
 
 ######################
-Adjustment <- (0, 1)
+Adjustment <- c(0, 1)
 for(Adjust in Adjustment){
   #######################
   FDRcutoff <- 0.05
@@ -8,8 +8,6 @@ for(Adjust in Adjustment){
   PsetVec <- list(CCLE, gCSI, CTRPv2, GDSC1000)
   names(PsetVec) <- c("CCLE", "gCSI",
                       "CTRPv2", "GDSC1000") 
-  ############################## Combination of significance of interactions between datasets
-  GSEADir <- "~/Desktop/Drug_Tissue_Association/GSEA/"
   ############################
   CCLE_cclMat <- readRDS(paste(GSEADir, "CCLE_originalAUC_Ncelline.rds", sep = ""))
   gCSI_cclMat <- readRDS(paste(GSEADir, "gCSI_originalAUC_Ncelline.rds", sep = ""))
