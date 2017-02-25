@@ -47,6 +47,9 @@ dir.create(GSEADir, showWarnings=FALSE, recursive=TRUE)
 #### should AUC values be corrected for genel level of drug sensitivity?
 Adjustment <- TRUE
 
+### quantile for AUC in each tissue type of interest
+quantileAUC <- 0.75
+
 ### Min and max number of cell lines in a tissue type
 TissueSize <- c(15, 200)
 
