@@ -156,5 +156,15 @@ tt <- list("Drug_Tissue_OriginalAUC"=Original_Results, "Drug_Tissue_AdjustedAUC"
 WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xlsx"))
 
 
+### proportion of drugs and tissues involved in a significant association
+tt <- Original_Results[!is.na(Original_Results[ , "Combined_FDR"]), ]
+tt2 <- Adjusted_Results[!is.na(Original_Results[ , "Combined_FDR"]), ]
+tt2 <- tt2[rownames(tt), ]
+tt3 <- apply(cbind(tt[ , "Combined_FDR"], tt2[ , "Combined_FDR"]), 1, min, na.rm=TRUE)
+names(tt3) <- rownames(tt)
+iix <- which(tt3 < FDRcutoff)
+length(sort(unique(tt[names(tt3)[iix], "Drug"]))) / length(sort(unique(tt[ , "Drug"])))
+
+
 ### end
 
