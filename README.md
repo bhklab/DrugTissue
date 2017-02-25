@@ -8,7 +8,8 @@ Research in oncology is traditionally focussed on a particular  tissue type from
 Citation
 --------
 
-soon<sup>TM<sup>
+Tissue specificity of in vitro drug sensitivity. Fupan Yao, Seyed Ali Madani Tonekaboni, Zhaleh Safikhani, Petr Smirnov, Nehme El-Hachem, Mark Freeman, Venkata Satya Kumar Manem, Benjamin Haibe-Kains. BioRxiv 2016, doi: http://dx.doi.org/10.1101/085357
+
 
 Full Reproducibility of the Analysis Results
 --------------------------------------------
