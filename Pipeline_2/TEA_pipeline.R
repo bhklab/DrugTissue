@@ -125,8 +125,15 @@ PsetVec$GDSC1000@cell[which(PsetVec$GDSC1000@cell[,"GDSC.Tissue.descriptor.1"] =
 
 
 ########################
+
 ### run tissue enrichment analysis
 source("TEA_analysis.R")
+
+### combine the results
+source("TEA_postprocess.R")
+
+### compute predictability of significant interactions
+source("TEA_predictability.R")
 
 
 ########################
