@@ -53,11 +53,11 @@ for(PsetIter in 1:length(PsetVec)){
         AUCmat_tissueinf[which(grepl("lymphoid", AUCmat_tissueinf[ , "tissueid"])), "tissueid"] <- NA
         AUCmat_tissueinf <- na.omit(AUCmat_tissueinf)
         celline_tissueinf <- cbind("g"=rownames(AUCmat_tissueinf), "s"=AUCmat_tissueinf[ , "tissueid"])
-        
+
         ### number of cell lines per tissue type
         tt <- table(celline_tissueinf[ , "s"])
         NcellineMat[names(tt), DrugVec[DrugIter]] <- tt
-        
+
         genelevelstats <- AUCmat_tissueinf[ , "AUC", drop=FALSE]
         gsc1 <- piano::loadGSC(celline_tissueinf)
 
@@ -100,10 +100,10 @@ for(PsetIter in 1:length(PsetVec)){
     message("")
     
     if (Adjustment) { AUCm <- AUCmat.adj } else { AUCm <- AUCmat }
-    ResultList <- list("Enrichment"=EnrichmentMat, "Pvalue"=PvalueMat, "N"=NcellineMat, "AUC"=AUCm)
-    saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
+    # ResultList <- list("Enrichment"=EnrichmentMat, "Pvalue"=PvalueMat, "N"=NcellineMat, "AUC"=AUCm)
+    # saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
     saveRDS(object=AUCm, file=paste(resfn, "AUC.rds", sep="_"))
-    saveRDS(object=NcellineMat, file=paste(resfn, "Ncelline.rds", sep="_"))
+    # saveRDS(object=NcellineMat, file=paste(resfn, "Ncelline.rds", sep="_"))PsetIter <- 4
     rm(list=c("ResultList", "AUCmat.adj", "AUCmat", "AUCm", "EnrichmentMat", "PvalueMat", "NcellineMat"))
     gc()
   }
