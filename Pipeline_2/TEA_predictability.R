@@ -65,14 +65,17 @@ predictabilityTEA <- function (drugTissueAssocs, FDRcutoff, PsetVec, Adjustment,
 ########################
 
 ### list of drug-tissue associations and their statistics
-drugTissueAssocs <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", ifelse(Adjustment, "adjustedAUC", "originalAUC"))))
+### originalAUC
+drugTissueAssocs <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "originalAUC")))
 drugTissueAssocs <- data.frame(drugTissueAssocs)
+ci.original <- predictabilityTEA(drugTissueAssocs, FDRcutoff, PsetVec, Adjustment=FALSE, GSEADir)
+### adjustedAUC
+drugTissueAssocs <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "adjustedAUC")))
+drugTissueAssocs <- data.frame(drugTissueAssocs)
+ci.adjusted <- predictabilityTEA(drugTissueAssocs, FDRcutoff, PsetVec, Adjustment=TRUE, GSEADir)
 
-predictabilityTEA(drugTissueAssocs, FDRcutoff, PsetVec, Adjustment, GSEADir)
 
 
-
-drugTissueAssocs <- cbind(drugTissueAssocs, "tissue_cindex"=ci)
 ll <- list("")
 WriteXLS::WriteXLS
 
