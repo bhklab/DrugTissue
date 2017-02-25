@@ -1,21 +1,4 @@
-#################
-rm(list = ls())
-require(gdata)
-require(e1071)
-require(genefu)
-library(Biobase)
-require(xtable)
-library(biomaRt)
-library(gplots)
-library(devtools)
-library(preprocessCore)
-library(rgl)
-library(qpcR)
-library(data.table)
-library(piano)
-library(snowfall)
-# devtools::install_github(repo="bhklab/PharmacoGx")
-library(PharmacoGx)
+
 ######################
 Adjustment <- (0, 1)
 for(Adjust in Adjustment){
