@@ -1,155 +1,173 @@
-
-###################
-Adjustment <- TRUE
-##############################
-PsetVec <- list(CCLE, gCSI, CTRPv2, GDSC1000)
-names(PsetVec) <- c("CCLE", "gCSI",
-                    "CTRPv2", "GDSC1000") 
-############################## Combination of significance of interactions between datasets
-runGSEADir <- "~/Desktop/Drug_Tissue_Association/GSEA/"
-
-if(Adjustment){
-  CCLE_output <- readRDS(paste(runGSEADir,"1_Adjusted_ResultList.rds", sep = ""))
-  gCSI_output <- readRDS(paste(runGSEADir,"2_Adjusted_ResultList.rds", sep = ""))
-  CTRPv2_output <- readRDS(paste(runGSEADir,"3_Adjusted_ResultList.rds", sep = ""))
-  GDSC1000_output <- readRDS(paste(runGSEADir,"4_Adjusted_ResultList.rds", sep = ""))
-  Output_List <- list(CCLE_output, gCSI_output,
-                      CTRPv2_output, GDSC1000_output)
-}else{
-  CCLE_output <- readRDS(paste(runGSEADir, "1_ResultList.rds", sep = ""))
-  gCSI_output <- readRDS(paste(runGSEADir, "2_ResultList.rds", sep = ""))
-  CTRPv2_output <- readRDS(paste(runGSEADir, "3_ResultList.rds", sep = ""))
-  GDSC1000 <- readRDS(paste(runGSEADir, "4_ResultList.rds", sep = ""))
-  Output_List <- list(CCLE_output, gCSI_output,
-                      CTRPv2_output, GDSC1000_output)
-}
-
-names(Output_List) <- c("CCLE", "gCSI",
-                        "CTRPv2", "GDSC1000")
-###################
-DrugTissueList <- list()
-DrugTissue_Names <- c()
-for(PsetName in names(PsetVec)){
-  print(PsetName)
-  
-  TargetPSet <- PsetVec[[PsetName]]
-  AUCmat <- summarizeSensitivityProfiles(TargetPSet,
-                                         sensitivity.measure="auc_recomputed")
-  DrugVec <- tolower(rownames(AUCmat))
-  
-  Pset_Result <- Output_List[[PsetName]]
-  EnrichmentMat <- Pset_Result$Enrichment
-  PvalMat <- Pset_Result$Pvalue
-  TissueMat <- Pset_Result$Tissues
-  
-  TissueNum <- nrow(TissueMat)
-  DrugTissueMat <- c()
-  
-  if(PsetName == "CTRPv2"){
-    
-    RemoveInd <- which(DrugVec == "sitagliptin")
-    
-    
-    DrugVec <- DrugVec[-RemoveInd]
-    for(DrugIter in c(1:(nrow(AUCmat)-1))){
-      
-      DrugTissueMat <- rbind(DrugTissueMat,
-                             cbind(tolower(TissueMat[,DrugIter]),
-                                   rep(DrugVec[DrugIter], TissueNum),
-                                   PvalMat[,DrugIter],
-                                   EnrichmentMat[,DrugIter]))
-      DrugTissue_Names <- rbind(DrugTissue_Names, cbind(TissueMat[,DrugIter],
-                                                        rep(DrugVec[DrugIter], TissueNum)))
-    }
-  }else{
-    for(DrugIter in c(1:nrow(AUCmat))){
-      
-      DrugTissueMat <- rbind(DrugTissueMat,
-                             cbind(tolower(TissueMat[,DrugIter]),
-                                   rep(DrugVec[DrugIter], TissueNum),
-                                   PvalMat[,DrugIter],
-                                   EnrichmentMat[,DrugIter]))
-      DrugTissue_Names <- rbind(DrugTissue_Names, cbind(TissueMat[,DrugIter],
-                                                        rep(DrugVec[DrugIter], TissueNum)))
-    }
-  }
-  
-  colnames(DrugTissueMat) <- c("Tissue", "Drug",
-                               "Pvalue", "Enrichment")
-  DrugTissueMat <- DrugTissueMat[-which(duplicated(paste(DrugTissueMat[,"Tissue"],
-                                                         DrugTissueMat[,"Drug"], sep = " "))),]
-  DrugTissueList[[PsetName]] <- DrugTissueMat
-}
-
-colnames(DrugTissue_Names) <- c("Tissue", "Drug")
-DrugTissue_Names <- DrugTissue_Names[-which(
-  duplicated(paste(DrugTissue_Names[,"Tissue"],
-                   DrugTissue_Names[,"Drug"], sep = " "))),]
+#################
+rm(list = ls())
+require(gdata)
+require(e1071)
+require(genefu)
+library(Biobase)
+require(xtable)
+library(biomaRt)
+library(gplots)
+library(devtools)
+library(preprocessCore)
+library(rgl)
+library(qpcR)
+library(data.table)
+library(piano)
+library(snowfall)
+# devtools::install_github(repo="bhklab/PharmacoGx")
+library(PharmacoGx)
 ######################
-DrugTissue_PvalEnrich <- cbind(DrugTissue_Names,
-                               matrix(rep(NA, nrow(DrugTissue_Names)*8),
-                                      ncol = 8))
-colnames(DrugTissue_PvalEnrich) <- c("Tissue", "Drug",
-                                     paste("Pval", names(PsetVec), sep = "_"),
-                                     paste("Enrichment", names(PsetVec),
-                                           sep = "_"))
-
-rownames(DrugTissue_PvalEnrich) <- paste(tolower(DrugTissue_PvalEnrich[,"Tissue"]),
-                                         tolower(DrugTissue_PvalEnrich[,"Drug"]),
-                                         sep = "_")
-########################
-for(PsetName in names(PsetVec)){
-  DrugTissueMat <- DrugTissueList[[PsetName]]
+Adjustment <- (0, 1)
+for(Adjust in Adjustment){
+  #######################
+  FDRcutoff <- 0.05
+  ##############################
+  PsetVec <- list(CCLE, gCSI, CTRPv2, GDSC1000)
+  names(PsetVec) <- c("CCLE", "gCSI",
+                      "CTRPv2", "GDSC1000") 
+  ############################## Combination of significance of interactions between datasets
+  GSEADir <- "~/Desktop/Drug_Tissue_Association/GSEA/"
+  ############################
+  CCLE_cclMat <- readRDS(paste(GSEADir, "CCLE_originalAUC_Ncelline.rds", sep = ""))
+  gCSI_cclMat <- readRDS(paste(GSEADir, "gCSI_originalAUC_Ncelline.rds", sep = ""))
+  CTRPv2_cclMat <- readRDS(paste(GSEADir, "CTRPv2_originalAUC_Ncelline.rds", sep = ""))
+  GDSC1000_cclMat <- readRDS(paste(GSEADir, "GDSC1000_originalAUC_Ncelline.rds", sep = ""))
   
-  MatchRows <- paste(tolower(DrugTissueMat[,"Tissue"]),
-                     tolower(DrugTissueMat[,"Drug"]),
-                     sep = "_")
+  CellNum_List <- list(CCLE_cclMat, gCSI_cclMat,
+                       CTRPv2_cclMat, GDSC1000_cclMat)
+  names(CellNum_List) <- names(PsetVec)
+  ########################
   
-  DrugTissue_PvalEnrich[MatchRows,paste("Pval", PsetName, sep = "_")] <- DrugTissueMat[,"Pvalue"]
-  DrugTissue_PvalEnrich[MatchRows,paste("Enrichment", PsetName, sep = "_")] <- DrugTissueMat[,"Enrichment"]
-}
-####################
-Combined_pval <- c()
-
-for(DrugTissueIter in 1:nrow(DrugTissue_PvalEnrich)){
-  pvals <- as.numeric(c(DrugTissue_PvalEnrich[DrugTissueIter,
-                                              c(paste("Pval", names(PsetVec),
-                                                      sep = "_"))]))
-  NaInd <- which(!is.na(pvals))
-  if(length(NaInd) > 1){
-    Combined_pval <- c(Combined_pval,
-                       combine.test(pvals[NaInd],
-                                    weight = rep(1,length(NaInd)),
-                                    method = "z.transform"))
+  if(Adjust == 1){
+    CCLE_output <- readRDS(paste(GSEADir,"CCLE_adjustedAUC_ResultList.rds", sep = ""))
+    gCSI_output <- readRDS(paste(GSEADir,"gCSI_adjustedAUC_ResultList.rds", sep = ""))
+    CTRPv2_output <- readRDS(paste(GSEADir,"CTRPv2_adjustedAUC_ResultList.rds", sep = ""))
+    GDSC1000_output <- readRDS(paste(GSEADir,"GDSC1000_adjustedAUC_ResultList.rds", sep = ""))
+    Output_List <- list(CCLE_output, gCSI_output,
+                        CTRPv2_output, GDSC1000_output)
   }else{
-    Combined_pval <- c(Combined_pval, NA)
+    CCLE_output <- readRDS(paste(GSEADir, "CCLE_originalAUC_ResultList.rds", sep = ""))
+    gCSI_output <- readRDS(paste(GSEADir, "gCSI_originalAUC_ResultList.rds", sep = ""))
+    CTRPv2_output <- readRDS(paste(GSEADir, "CTRPv2_originalAUC_ResultList.rds", sep = ""))
+    GDSC1000_output <- readRDS(paste(GSEADir, "GDSC1000_originalAUC_ResultList.rds", sep = ""))
+    Output_List <- list(CCLE_output, gCSI_output,
+                        CTRPv2_output, GDSC1000_output)
   }
   
+  names(Output_List) <- names(PsetVec)
+  ###################
+  DrugTissueList <- list()
+  DrugTissue_Names <- c()
+  for(PsetName in names(PsetVec)){
+    print(PsetName)
+    
+    CellLineMat <- CellNum_List[[PsetName]]
+    
+    Pset_Result <- Output_List[[PsetName]]
+    EnrichmentMat <- Pset_Result$Enrichment
+    PvalMat <- Pset_Result$Pvalue
+    
+    DrugVec <- colnames(PvalMat)
+    TissueVec <- rownames(PvalMat)
+    
+    TissueNum <- nrow(PvalMat)
+    DrugTissueMat <- c()
+    
+    for(DrugIter in c(1:ncol(PvalMat))){
+      
+      NAind <- as.numeric(which(is.na(PvalMat[,DrugIter])))
+      DrugTissueMat <- rbind(DrugTissueMat,
+                             cbind(TissueVec[-NAind],
+                                   rep(DrugVec[DrugIter], (TissueNum-length(NAind))),
+                                   PvalMat[-NAind,DrugIter],
+                                   EnrichmentMat[-NAind,DrugIter],
+                                   CellLineMat[-NAind,DrugIter]))
+      DrugTissue_Names <- rbind(DrugTissue_Names, cbind(TissueVec[-NAind],
+                                                        rep(DrugVec[DrugIter], (TissueNum-length(NAind)))))
+    }
+    
+    
+    colnames(DrugTissueMat) <- c("Tissue", "Drug",
+                                 "Pvalue", "Enrichment", "CCL_Num")
+    DrugTissueList[[PsetName]] <- DrugTissueMat
+  }
+  
+  colnames(DrugTissue_Names) <- c("Tissue", "Drug")
+  DrugTissue_Names <- DrugTissue_Names[-which(
+    duplicated(paste(DrugTissue_Names[,"Tissue"],
+                     DrugTissue_Names[,"Drug"], sep = " "))),]
+  ######################
+  DrugTissue_PvalEnrich <- cbind(DrugTissue_Names,
+                                 matrix(rep(NA, nrow(DrugTissue_Names)*12),
+                                        ncol = 12))
+  colnames(DrugTissue_PvalEnrich) <- c("Tissue", "Drug",
+                                       paste("Pval", names(PsetVec), sep = "_"),
+                                       paste("Enrichment", names(PsetVec),sep = "_"),
+                                       paste("CCL_Num", names(PsetVec),sep = "_"))
+  
+  rownames(DrugTissue_PvalEnrich) <- paste(DrugTissue_PvalEnrich[,"Tissue"],
+                                           DrugTissue_PvalEnrich[,"Drug"],
+                                           sep = "_")
+  ########################
+  for(PsetName in names(PsetVec)){
+    DrugTissueMat <- DrugTissueList[[PsetName]]
+    
+    MatchRows <- paste(DrugTissueMat[,"Tissue"],
+                       DrugTissueMat[,"Drug"],
+                       sep = "_")
+    
+    DrugTissue_PvalEnrich[MatchRows,paste("Pval", PsetName, sep = "_")] <- DrugTissueMat[,"Pvalue"]
+    DrugTissue_PvalEnrich[MatchRows,paste("Enrichment", PsetName, sep = "_")] <- DrugTissueMat[,"Enrichment"]
+    DrugTissue_PvalEnrich[MatchRows,paste("CCL_Num", PsetName, sep = "_")] <- DrugTissueMat[,"CCL_Num"]
+  }
+  ####################
+  Combined_pval <- c()
+  
+  for(DrugTissueIter in 1:nrow(DrugTissue_PvalEnrich)){
+    pvals <- as.numeric(c(DrugTissue_PvalEnrich[DrugTissueIter,
+                                                c(paste("Pval", names(PsetVec),
+                                                        sep = "_"))]))
+    CCLNums <- as.numeric(c(DrugTissue_PvalEnrich[DrugTissueIter,
+                                                  c(paste("CCL_Num", names(PsetVec),
+                                                          sep = "_"))]))
+    NotNa <- which(!is.na(pvals))
+    if(length(NotNa) > 1){
+      Combined_pval <- c(Combined_pval,
+                         combine.test(pvals[NotNa],
+                                      weight = CCLNums[NotNa],
+                                      method = "z.transform"))
+    }else{
+      Combined_pval <- c(Combined_pval, NA)
+    }
+    
+  }
+  DrugTissue_PvalEnrich <- cbind(DrugTissue_PvalEnrich,
+                                 Combined_pval, p.adjust(Combined_pval, method = "fdr"))
+  ################
+  FDRMat <- c()
+  for(PsetName in names(PsetVec)){
+    print(PsetName)
+    FDRMat <- cbind(FDRMat, p.adjust(DrugTissue_PvalEnrich[,paste("Pval", PsetName, sep = "_")],
+                                     method = "fdr"))
+  }
+  
+  DrugTissue_PvalEnrich <- cbind(DrugTissue_PvalEnrich[,c(1,2)],
+                                 FDRMat, DrugTissue_PvalEnrich[,c(3:ncol(DrugTissue_PvalEnrich))])
+  
+  ################
+  colnames(DrugTissue_PvalEnrich) <- c("Tissue", "Drug",
+                                       paste("Pval", names(PsetVec), sep = "_"),
+                                       paste("FDR", names(PsetVec), sep = "_"),
+                                       paste("Enrichment", names(PsetVec), sep = "_"),
+                                       paste("CCL_Num", names(PsetVec), sep = "_"),
+                                       "Combined_Pval", "Combined_FDR")
+  DrugTissue_PvalEnrich <- as.data.frame(DrugTissue_PvalEnrich)
+  
+  if(Adjust == 1){
+    FileName <- "adjusted"
+  }else{
+    FileName <- "original"
+  }
+  saveRDS(DrugTissue_PvalEnrich, file = paste(GSEADir, "DrugTissue_PvalEnrich_",FileName,"AUC.rds"))
+  WriteXLS(DrugTissue_PvalEnrich, file = paste(GSEADir, "DrugTissue_PvalEnrich_",FileName,"AUC.xls"))
 }
-DrugTissue_PvalEnrich <- cbind(DrugTissue_PvalEnrich,
-                               Combined_pval,
-                               p.adjust(Combined_pval, method = "fdr"))
-################
-for(PsetName in names(PsetVec)){
-  print(PsetName)
-  DrugTissue_PvalEnrich[,paste("Pval", names(PsetVec), sep = "_")] <- p.adjust(DrugTissue_PvalEnrich[,paste("Pval", names(PsetVec), sep = "_")],
-                                                                               method = "fdr")
-}
-################
-colnames(DrugTissue_PvalEnrich) <- c("Tissue", "Drug",
-                                     paste("FDR", names(PsetVec), sep = "_"),
-                                     paste("Enrichment", names(PsetVec), sep = "_"),
-                                     "Combined_Pval", "Combined_FDR")
-saveRDS(DrugTissue_PvalEnrich, file = paste(runGSEADir,
-                                            Adjustment,
-                                            ".rds"))
-
-############### percentage of significant interactions
-print(length(which(DrugTissue_PvalEnrich[,"Combined_FDR"] < 0.05))
-      /length(which(!is.na(DrugTissue_PvalEnrich[,"Combined_FDR"]))))
-##############
-table(DrugTissue_PvalEnrich[which(DrugTissue_PvalEnrich[,"Combined_FDR"] < 0.05),"Tissue"])
-##############
-table(DrugTissue_PvalEnrich[which(DrugTissue_PvalEnrich[,"Combined_FDR"] < 0.05),"Drug"])
-##############
-
