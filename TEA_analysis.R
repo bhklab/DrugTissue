@@ -103,7 +103,7 @@ for(PsetIter in 1:length(PsetVec)){
     ResultList <- list("Enrichment"=EnrichmentMat, "Pvalue"=PvalueMat, "N"=NcellineMat, "AUC"=AUCm)
     saveRDS(object=ResultList, file=paste(resfn, "ResultList.rds", sep="_"))
     saveRDS(object=AUCm, file=paste(resfn, "AUC.rds", sep="_"))
-    saveRDS(object=NcellineMat, file=paste(resfn, "Ncelline.rds", sep="_"))PsetIter <- 4
+    saveRDS(object=NcellineMat, file=paste(resfn, "Ncelline.rds", sep="_"))
     rm(list=c("ResultList", "AUCmat.adj", "AUCmat", "AUCm", "EnrichmentMat", "PvalueMat", "NcellineMat"))
     gc()
   }
