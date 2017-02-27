@@ -152,7 +152,7 @@ Adjusted_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment=TRUE,
 
 tt <- list("Drug_Tissue_OriginalAUC"=Original_Results, "Drug_Tissue_AdjustedAUC"=Adjusted_Results)
 WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xlsx"))
-
+WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xls"))
 
 ### proportion of drugs and tissues involved in a significant association
 # tt <- Original_Results[!is.na(Original_Results[ , "Combined_FDR"]), ]

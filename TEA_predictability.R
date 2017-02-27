@@ -85,7 +85,7 @@ drugTissueAssocs <- drugTissueAssocs[order(rownames(drugTissueAssocs)), , drop=F
 
 ll <- list("Drug Tissue Associations"=drugTissueAssocs)
 WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xlsx", ceiling(FDRcutoff*100))))
-
+WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xls", ceiling(FDRcutoff*100))))
 
 
 ### end
