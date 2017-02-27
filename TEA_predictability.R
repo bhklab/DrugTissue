@@ -88,5 +88,18 @@ WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAss
 WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xls", ceiling(FDRcutoff*100))))
 
 
+### overlap with DrugBank
+# drugbank <- readRDS("clinical indications.RDS")
+#
+# ddb <- intersect(sort(unique(drugTissueAssocs[ , "Drug"])), drugbank[ , "drug"])
+#
+# iix <- drugTissueAssocs[ , "Drug"] %in% drugbank[ , "drug"] & (drugTissueAssocs[ ,"quantileAUC"] > 0.2)
+#
+# sort(unique(drugTissueAssocs[iix, "Tissue"]))
+# sort(unique(drugbank[drugbank[ , "drug"] %in% ddb, "variable"]))
+#
+# tt <- as.table(cbind(c(958, 42), c(108,5)))
+# PharmacoGx:::.mcc(tt)
+
 ### end
 
