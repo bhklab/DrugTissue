@@ -1,12 +1,12 @@
 source("https://bioconductor.org/biocLite.R")
 
 list.of.packages <- c("ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra", "gplots","pheatmap","RColorBrewer", 
-                      "VennDiagram", "gdata", "e1071", "genefu", "xtable", "data.table", "snowfall", "utils",
+                      "VennDiagram", "gdata", "e1071", "xtable", "data.table", "snowfall", "utils",
                       "Hmisc", "WriteXLS", "qpcR", "rgl", "devtools", "ggplot2")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos='http://cran.utstat.utoronto.ca/')
 
-biocLite(pkgs = c("Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore"))
+biocLite(pkgs = c("Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore", "genefu"))
 
 library(mgcv)
 library(reshape2)
