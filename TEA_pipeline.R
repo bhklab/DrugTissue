@@ -30,6 +30,7 @@ library(Hmisc)
 library(WriteXLS)
 # devtools::install_github(repo="bhklab/PharmacoGx")
 library(PharmacoGx)
+library(survcomp)
 
 ########################
 ### global parameters
