@@ -1,6 +1,6 @@
 source("https://bioconductor.org/biocLite.R")
 
-list.of.CRAN.packages <- c("ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra", "gplots","pheatmap","RColorBrewer", 
+list.of.CRAN.packages <- c("parallel", "ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra", "gplots","pheatmap","RColorBrewer", 
                       "VennDiagram", "gdata", "e1071", "xtable", "data.table", "snowfall", "utils",
                       "Hmisc", "WriteXLS", "rgl", "qpcR", "devtools", "ggplot2")
 new.CRAN.packages <- list.of.CRAN.packages[!(list.of.CRAN.packages %in% installed.packages()[,"Package"])]
