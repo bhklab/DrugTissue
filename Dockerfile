@@ -16,9 +16,11 @@ RUN yum clean all
 
 RUN yum -y update
 
-RUN git clone https://github.com/bhklab/DrugTissue.git
+RUN yum install -y libxml2-devel.x86_64 libcurl-devel openssl-devel mesa-libGL mesa-libGL-devel mesa-libGLU mesa-libGLU-devel libX11-devel
 
-RUN yum install -y libxml2-devel.x86_64 libcurl-devel openssl-devel
+RUN yum group install -y X11
+
+RUN git clone https://github.com/bhklab/DrugTissue.git
 
 RUN Rscript ./DrugTissue/TEA_dependency_installer.R
 

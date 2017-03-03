@@ -6,32 +6,13 @@ list.of.packages <- c("ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra",
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos='http://cran.utstat.utoronto.ca/', dependencies = TRUE, clean = TRUE, Ncpus = 2, verbose = TRUE, quiet = TRUE)
 
-biocLite(pkgs = c("Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore", "genefu"))
+biocLite(pkgs = c("Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore", "genefu"), threads = 2)
 
-library(mgcv)
-library(reshape2)
-library(gridExtra)
-library(grid)
-library(gplots)
-library(RColorBrewer)
-library(pheatmap)
-library(VennDiagram)
-library(gdata)
-library(e1071)
-library(genefu)
-library(xtable)
-library(biomaRt)
-library(devtools)
-library(preprocessCore)
-library(rgl)
-library(qpcR)
-library(data.table)
-library(snowfall)
-library(utils)
-library(Hmisc)
-library(WriteXLS)
-library(Biobase)
-library(piano)
-library(PharmacoGx)
-library(survcomp)
-library(ggplot2)
+dependencies <- c(list.of.packages, "Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore", "genefu")
+
+
+message("=== package install success status ===")
+
+for(package in dependencies){
+  message(paste(package, library(package, character.only = TRUE, quietly = TRUE, logical.return = TRUE, verbose = FALSE), sep = ": "))
+}
