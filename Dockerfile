@@ -22,6 +22,8 @@ RUN yum install -y ImageMagick-c++-devel cairo-devel
 
 RUN yum group install -y X11
 
+RUN yum install -y openmpi openmpi-devel
+
 RUN git clone https://github.com/bhklab/DrugTissue.git
 
 RUN Rscript ./DrugTissue/TEA_dependency_installer.R
