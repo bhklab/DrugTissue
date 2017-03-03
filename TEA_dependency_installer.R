@@ -1,15 +1,17 @@
 source("https://bioconductor.org/biocLite.R")
 
-list.of.packages <- c("ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra", "gplots","pheatmap","RColorBrewer", 
+list.of.CRAN.packages <- c("ggplot2", "XML", "mgcv", "reshape2", "grid", "gridExtra", "gplots","pheatmap","RColorBrewer", 
                       "VennDiagram", "gdata", "e1071", "xtable", "data.table", "snowfall", "utils",
                       "Hmisc", "WriteXLS", "rgl", "qpcR", "devtools", "ggplot2")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, repos='http://cran.utstat.utoronto.ca/', dependencies = TRUE, clean = TRUE, Ncpus = 2, verbose = TRUE, quiet = TRUE)
+new.CRAN.packages <- list.of.CRAN.packages[!(list.of.CRAN.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.CRAN.packages, repos='http://cran.utstat.utoronto.ca/', dependencies = TRUE, clean = TRUE, Ncpus = 2, verbose = TRUE, quiet = TRUE)
 
-biocLite(pkgs = c("Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore", "genefu"), threads = 2)
 
-dependencies <- c(list.of.packages, "Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore", "genefu")
+list.of.bioC.packages <- c("Biobase", "survcomp", "piano", "PharmacoGx", "biomaRt", "preprocessCore", "genefu")
+new.bioC.packages <- list.of.bioC.packages[!(list.of.bioC.packages %in% installed.packages()[,"Package"])]
+biocLite(pkgs = new.bioC.packages, threads = 2, ask = FALSE)
 
+dependencies <- c(list.of.CRAN.packages, list.of.bioC.packages)
 
 message("=== package install success status ===")
 
