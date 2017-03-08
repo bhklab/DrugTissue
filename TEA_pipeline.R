@@ -148,7 +148,12 @@ for (PsetIter in 1:length(PsetVec)) {
 }
 ### save
 ll <- list("Drugs"=data.frame(drugsMat), "Cell lines"=data.frame(cellsMat), "Tissue Types"=data.frame(tissuesMat))
-WriteXLS::WriteXLS("ll", ExcelFileName=file.path(OutDir, sprintf("Dataset_Info.xlsx")), row.names=TRUE)
+
+for(ll_c in 1:length(ll)){
+  xlsx::write.xlsx(ll[[ll_c]], file = file.path(OutDir, sprintf("Dataset_Info.xlsx")), row.names = TRUE, append = TRUE, sheetName = names(ll)[ll_c], showNA = FALSE)
+}
+
+#WriteXLS::WriteXLS("ll", ExcelFileName=file.path(OutDir, sprintf("Dataset_Info.xlsx")), row.names=TRUE)
 
 ########################
 

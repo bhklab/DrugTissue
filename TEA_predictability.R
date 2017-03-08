@@ -86,9 +86,13 @@ drugTissueAssocs <- rbind(drugTissueAssocs, cbind(drugTissueAssocs.adjusted[rown
 drugTissueAssocs <- drugTissueAssocs[order(rownames(drugTissueAssocs)), , drop=FALSE]
 
 ll <- list("Drug Tissue Associations"=drugTissueAssocs)
-WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xlsx", ceiling(FDRcutoff*100))))
-WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xls", ceiling(FDRcutoff*100))))
+#WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xlsx", ceiling(FDRcutoff*100))))
+#WriteXLS::WriteXLS("ll", ExcelFileName=file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xls", ceiling(FDRcutoff*100))))
 
+xlsx::write.xlsx(drugTissueAssocs, file = file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xlsx", ceiling(FDRcutoff*100))), 
+                 sheetName = "Drug Tissue Associations", showNA = TRUE)
+xlsx::write.xlsx(drugTissueAssocs, file = file.path(GSEADir, sprintf("drugTissueAssocs_FDR_%i.xls", ceiling(FDRcutoff*100))), 
+                 sheetName = "Drug Tissue Associations", showNA = TRUE)
 
 ### overlap with DrugBank
 # drugbank <- readRDS("clinical indications.RDS")

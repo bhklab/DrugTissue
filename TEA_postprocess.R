@@ -151,8 +151,13 @@ names(ResultFileNames) <- c("CCLE", "gCSI", "CTRPv2", "GDSC1000")
 Adjusted_Results <- postprocessingTEA(ResultFileNames, PsetVec, Adjustment=TRUE, GSEADir)
 
 tt <- list("Drug_Tissue_OriginalAUC"=Original_Results, "Drug_Tissue_AdjustedAUC"=Adjusted_Results)
-WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xlsx"))
-WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xls"))
+#WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xlsx"))
+#WriteXLS::WriteXLS("tt", ExcelFileName=file.path(GSEADir, "DrugTissueAssocs_All.xls"))
+
+for(tt_c in 1:length(tt)){
+  xlsx::write.xlsx(tt[[tt_c]], file = file.path(GSEADir, "DrugTissueAssocs_All.xlsx"), append = TRUE, sheetName = names(tt)[tt_c], showNA = TRUE)
+  xlsx::write.xlsx(tt[[tt_c]], file = file.path(GSEADir, "DrugTissueAssocs_All.xls"), append = TRUE, sheetName = names(tt)[tt_c], showNA = TRUE)
+}
 
 ### proportion of drugs and tissues involved in a significant association
 # tt <- Original_Results[!is.na(Original_Results[ , "Combined_FDR"]), ]
