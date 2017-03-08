@@ -69,10 +69,12 @@ predictabilityTEA <- function (drugTissueAssocs, FDRcutoff, PsetVec, Adjustment,
 ### originalAUC
 drugTissueAssocs.original <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "originalAUC")))
 drugTissueAssocs.original <- data.frame(drugTissueAssocs.original)
+drugTissueAssocs.original$Combined_FDR <- as.numeric(drugTissueAssocs.original$Combined_FDR)
 ci.original <- predictabilityTEA(drugTissueAssocs.original, FDRcutoff, PsetVec, Adjustment=FALSE, quantileAUC, GSEADir)
 ### adjustedAUC
 drugTissueAssocs.adjusted <- readRDS(file.path(GSEADir, sprintf("DrugTissue_PvalEnrich_%s.rds", "adjustedAUC")))
 drugTissueAssocs.adjusted <- data.frame(drugTissueAssocs.adjusted)
+drugTissueAssocs.adjusted$Combined_FDR <- as.numeric(drugTissueAssocs.adjusted$Combined_FDR)
 ci.adjusted <- predictabilityTEA(drugTissueAssocs.adjusted, FDRcutoff, PsetVec, Adjustment=TRUE, quantileAUC, GSEADir)
 
 
