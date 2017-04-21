@@ -1,3 +1,5 @@
+source("get_drug_indications.R")
+
 drug_indications<- get_drug_indications(unique(c(p_adj_false$Drug, p_adj_true$Drug)))
 
 output2 <- melt(drug_indications, id.vars = c("drug"))
