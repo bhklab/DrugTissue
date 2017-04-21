@@ -171,6 +171,8 @@ source("TEA_postprocess.R")
 ### compute predictability of significant interactions
 source("TEA_predictability.R")
 
+source("TEA_figure_generator.R")
+
 ########################
 ### save session info
 
