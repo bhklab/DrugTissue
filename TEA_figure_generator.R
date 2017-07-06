@@ -1,6 +1,6 @@
 ### File Inputs
-p_adj_false <- read.xlsx("./Drug_Tissue_Interactions/DrugTissueAssocs_All.xlsx", sheet = 1)
-p_adj_true <- read.xlsx("./Drug_Tissue_Interactions/DrugTissueAssocs_All.xlsx", sheet = 2)
+p_adj_false <- read.xlsx(file.path(GSEADir, "DrugTissueAssocs_All.xlsx"), sheet = 1)
+p_adj_true <- read.xlsx(file.path(GSEADir, "DrugTissueAssocs_All.xlsx"), sheet = 2)
 
 p_adj_true <- as.data.frame(p_adj_true)
 p_adj_false <- as.data.frame(p_adj_false)
@@ -14,14 +14,16 @@ sig_adj_true <- p_adj_true[!is.na(p_adj_true$Combined_FDR) & as.numeric(p_adj_tr
 library(PharmacoGx)
 library(VennDiagram)
 library(ggplot2)
+library(xlsx)
 
 GDSC1000 <- downloadPSet("GDSC1000")
 gCSI <- downloadPSet("gCSI")
 CCLE <- downloadPSet("CCLE")
 CTRPv2 <- downloadPSet("CTRPv2") 
 
-file.create("./figures")
-
+if(!dir.exists("./figures")){
+  dir.create("./figures")
+}
 ### Cell Line Breakdown by Dataset (Figure 2A)
 
 linenums <- as.data.frame(matrix(ncol = 4, nrow = nrow(combined1)))
@@ -96,7 +98,6 @@ linenums <- melt(as.matrix(linenums))
 colnames(linenums) <- c("tissue type", "dataset", "value")
 
 linenums$`tissue type` <- gsub("_", " ", linenums$`tissue type`)
-
 linenums$`tissue type` <- as.factor(linenums$`tissue type`)
 
 pdf("./figures/figure2a.pdf")
@@ -333,7 +334,7 @@ edges$value <- 2
 edges <- unique(edges)
 rownames(edges) <- paste(edges$Tissue, edges$Drug, sep = "_")
 
-clinical_indications <- readRDS("/Users/gosuzombie/Documents/DrugTissue/clinical indications.RDS")
+clinical_indications <- readRDS("./clinical indications.RDS")
 
 for(app in 1:nrow(clinical_indications)){
   if(paste(clinical_indications$variable[app], clinical_indications$drug[app], sep = "_") %in% rownames(edges)){
@@ -392,25 +393,21 @@ close(f)
 
 ### Jaeger Overlap (Supplementary Figure)
 badchars <- "[\xb5]|[]|[ ,]|[;]|[:]|[-]|[+]|[*]|[%]|[$]|[#]|[{]|[}]|[[]|[]]|[|]|[\\^]|[/]|[\\]|[.]|[_]|[ ]"
-breast <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Breast cancer")
-colorectal <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Colorectal cancer")
-prostate <- xlsx::read.xlsx(paste(path.input, "12943_2015_312_MOESM2_ESM.xlsx", sep = "/"), sheetName = "Prostate cancer")
+
+download.file(url = "https://static-content.springer.com/esm/art%3A10.1186%2Fs12943-015-0312-6/MediaObjects/12943_2015_312_MOESM2_ESM.xlsx",
+              destfile = "./Output/12943_2015_312_MOESM2_ESM.xlsx")
+breast <- read.xlsx("./Output/12943_2015_312_MOESM2_ESM.xlsx", sheetName = "Breast cancer")
+colorectal <- read.xlsx("./Output/12943_2015_312_MOESM2_ESM.xlsx", sheetName = "Colorectal cancer")
+prostate <- read.xlsx("./Output/12943_2015_312_MOESM2_ESM.xlsx", sheetName = "Prostate cancer")
 
 breast <- breast[, "Drug.name"]
 colorectal <- colorectal[, "Drug.name"]
 prostate <- prostate[, "Drug.name"]
 
-p_adj_false <- read.xlsx("./DrugTissueAssocs_All.xlsx", sheet = 1)
-p_adj_true <- read.xlsx("./DrugTissueAssocs_All.xlsx", sheet = 2)
-
-cut_off <- 0.05
-sig_adj_false <- p_adj_false[!is.na(p_adj_false$Combined_FDR) & as.numeric(p_adj_false$Combined_FDR) < cut_off, ]
-sig_adj_true <- p_adj_true[!is.na(p_adj_true$Combined_FDR) & as.numeric(p_adj_true$Combined_FDR) < cut_off, ]
-
 meta_false <- p_adj_false[!is.na(p_adj_false$Combined_FDR), ]
 meta_true <- p_adj_true[!is.na(p_adj_true$Combined_FDR), ]
 
-clinical_indications <- readRDS("clinical indications.RDS")
+clinical_indications <- readRDS("./clinical indications.RDS")
 
 list_of_drugs <- unique(meta_false$Drug, meta_true$Drug)
 
